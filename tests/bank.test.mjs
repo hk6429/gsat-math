@@ -8,9 +8,9 @@ const context = { window: {} };
 vm.runInNewContext(code, context);
 const bank = context.window.MATH_BANK;
 
-test("收錄 102～115 各正式數學考科，每卷 20 題", () => {
-  assert.equal(bank.length, 19);
-  assert.deepEqual(Array.from(bank, (exam) => `${exam.year}${exam.subject}`), ["115A", "115B", "114A", "114B", "113A", "113B", "112A", "112B", "111A", "111B", "110M", "109M", "108M", "107M", "106M", "105M", "104M", "103M", "102M"]);
+test("收錄 101～115 各正式數學考科，每卷 20 題", () => {
+  assert.equal(bank.length, 20);
+  assert.deepEqual(Array.from(bank, (exam) => `${exam.year}${exam.subject}`), ["115A", "115B", "114A", "114B", "113A", "113B", "112A", "112B", "111A", "111B", "110M", "109M", "108M", "107M", "106M", "105M", "104M", "103M", "102M", "101M"]);
   for (const exam of bank) assert.equal(exam.questions.length, 20);
 });
 
@@ -77,7 +77,8 @@ test("官方答案逐題固定", () => {
     "105M": ["3","5","2","1","2","4","2,3,5","1,2,4","3,5","1,4,5","1,2,4","2,5","4,5","42","7/2","1+√5","a=1,b=4,c=1,d=-2","6","19/36","4/3"],
     "104M": ["3","4","2","1","2,4,5","1,4,5","1,2,4","1,2,4,5","2,4","2,3,4","62","1/2","70","6√2+2√6","(9,1)","8181","44","16√5/3","25/29","6.1"],
     "103M": ["5","4","2","4","2","2","1,3,5","1,4","2,3,4","3,4","2,3,5","1,4","120/13","a=6,b=-9","4√3","5/4","-√3/2","11","13/8","(√6-√2)/2"],
-    "102M": ["5","4","3","5","2","3","1,2,3,5","1,2","4,5","1,3,4","1,2,5","1,3","16","(-4,12)","19","a=-2,b=70","51π","31","4√15","15/11"]
+    "102M": ["5","4","3","5","2","3","1,2,3,5","1,2","4,5","1,3,4","1,2,5","1,3","16","(-4,12)","19","a=-2,b=70","51π","31","4√15","15/11"],
+    "101M": ["2","5","4","1","3","2","3","1,2,5","1,2","4,5","3,4","2,4","1,2,5","1.21","-3","(-3,26)","x=-1,min=-3","7","m=12,n=16","3/7"]
   };
   for (const exam of bank) {
     assert.deepEqual(Array.from(exam.questions, (q) => q.answer), expected[`${exam.year}${exam.subject}`]);
@@ -99,7 +100,7 @@ test("正式來源 manifest 與完整回補範圍已登錄", () => {
   assert.equal(catalog.scope.firstYear, 83);
   assert.equal(catalog.scope.latestYear, 115);
   assert.equal(catalog.scope.expectedExamForms, 38);
-  for (const year of [102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115]) {
+  for (const year of [101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115]) {
     const source = JSON.parse(readFileSync(new URL(`../sources/${year}.json`, import.meta.url), "utf8"));
     assert.equal(source.files.length, year >= 111 ? 7 : 3);
     for (const file of source.files) {
