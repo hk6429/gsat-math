@@ -122,10 +122,10 @@ test("分類與標籤完整", () => {
   }
 });
 
-test("106～115 學年度選擇題附官方各選項畫記率，未公開年份不反推", () => {
+test("105～115 學年度選擇題附官方各選項畫記率，未公開年份不反推", () => {
   for (const exam of bank) {
     for (const q of exam.questions) {
-      const hasPublishedRates = (exam.year === 107 && q.no <= 12) || (exam.year >= 106 && exam.year <= 110 && q.no <= 13) || (exam.year >= 111 && q.no <= 12);
+      const hasPublishedRates = (exam.year === 107 && q.no <= 12) || (exam.year >= 105 && exam.year <= 110 && q.no <= 13) || (exam.year >= 111 && q.no <= 12);
       if (hasPublishedRates && (q.kind === "single" || q.kind === "multi")) {
         assert.equal(q.optionRates.length, 5, `${exam.year}${exam.subject} 第 ${q.no} 題`);
         for (const rate of q.optionRates) assert.ok(Number.isFinite(rate) && rate >= 0 && rate <= 100);
@@ -141,6 +141,7 @@ test("106～115 學年度選擇題附官方各選項畫記率，未公開年份�
   assert.deepEqual(Array.from(bank.find((exam) => exam.year === 108).questions[12].optionRates), [27, 30, 77, 73, 28]);
   assert.deepEqual(Array.from(bank.find((exam) => exam.year === 107).questions[11].optionRates), [53, 31, 64, 63, 41]);
   assert.deepEqual(Array.from(bank.find((exam) => exam.year === 106).questions[12].optionRates), [49, 39, 73, 42, 72]);
+  assert.deepEqual(Array.from(bank.find((exam) => exam.year === 105).questions[12].optionRates), [25, 27, 23, 84, 63]);
 });
 
 test("首頁與查題頁都載入解析及官方選項統計介面", () => {
@@ -189,12 +190,12 @@ test("逐字 LaTeX 題目資料具有題幹、選項、解析與官方頁碼", (
       }
     }
   }
-  for (const year of [106, 107, 108, 109, 110]) {
+  for (const year of [105, 106, 107, 108, 109, 110]) {
     for (let no = 1; no <= 20; no += 1) {
       assert.ok(mathContent[`${year}M-${no}`], `缺少 ${year}M 第 ${no} 題結構化資料`);
     }
   }
-  assert.equal(Object.keys(mathContent).length, 300);
+  assert.equal(Object.keys(mathContent).length, 320);
 });
 
 test("正式來源 manifest 與完整回補範圍已登錄", () => {
