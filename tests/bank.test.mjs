@@ -8,9 +8,9 @@ const context = { window: {} };
 vm.runInNewContext(code, context);
 const bank = context.window.MATH_BANK;
 
-test("收錄 112～115 數學 A、數學 B 各 20 題", () => {
-  assert.equal(bank.length, 8);
-  assert.deepEqual(Array.from(bank, (exam) => `${exam.year}${exam.subject}`), ["115A", "115B", "114A", "114B", "113A", "113B", "112A", "112B"]);
+test("收錄 111～115 數學 A、數學 B 各 20 題", () => {
+  assert.equal(bank.length, 10);
+  assert.deepEqual(Array.from(bank, (exam) => `${exam.year}${exam.subject}`), ["115A", "115B", "114A", "114B", "113A", "113B", "112A", "112B", "111A", "111B"]);
   for (const exam of bank) assert.equal(exam.questions.length, 20);
 });
 
@@ -63,7 +63,9 @@ test("官方答案逐題固定", () => {
     "113A": ["2","5","1","2","4","3","3,4","2,3","3","3,5","2,3","2,4,5","2:3:5","-3,3","25","2√5/5","1/3","4","／","／"],
     "113B": ["4","1","2","4","3","1","3","1,2,5","2,5","1,3,4","1,4,5","1,4","-1","2/7","3,-6","4π/3","76","4","／","／"],
     "112A": ["4","5","4","1","2","3","3,5","1,4","3,5","1,3,5","2,5","1,5","80","3,-9","3/4","2√2","5√2","4","／","／"],
-    "112B": ["1","2","4","3","5","3","4","2,4","3,4,5","1,5","1,4","1,3","7/3","90","22","625/24","108","1/2","／","／"]
+    "112B": ["1","2","4","3","5","3","4","2,4","3,4,5","1,5","1,4","1,3","7/3","90","22","625/24","108","1/2","／","／"],
+    "111A": ["4","1","5","3","2","5","2,4","1,4","3,4","1,2","2,3,4","1,2","4.2","2,1/2","192","-3,-2,5","21","4","／","／"],
+    "111B": ["1","3","2","2","5","3","5","1,2,5","1","1,2,4","2,3","3,5","99","17","14/15","31/45","456","4","／","／"]
   };
   for (const exam of bank) {
     assert.deepEqual(Array.from(exam.questions, (q) => q.answer), expected[`${exam.year}${exam.subject}`]);
@@ -85,7 +87,7 @@ test("正式來源 manifest 與完整回補範圍已登錄", () => {
   assert.equal(catalog.scope.firstYear, 83);
   assert.equal(catalog.scope.latestYear, 115);
   assert.equal(catalog.scope.expectedExamForms, 38);
-  for (const year of [112, 113, 114, 115]) {
+  for (const year of [111, 112, 113, 114, 115]) {
     const source = JSON.parse(readFileSync(new URL(`../sources/${year}.json`, import.meta.url), "utf8"));
     assert.equal(source.files.length, 7);
     for (const file of source.files) {

@@ -1,0 +1,43 @@
+{
+  "year": 111,
+  "publisher": "財團法人大學入學考試中心基金會",
+  "officialPage": "https://www.ceec.edu.tw/xmfile?page=4&xsmsid=0J052424829869345634",
+  "workReportsPage": "https://www.ceec.edu.tw/xmdoc?xsmsid=0J018604611989052655",
+  "files": [
+    {
+      "id": "math-a-questions",
+      "url": "https://www.ceec.edu.tw/files/file_pool/1/0m052633042401295651/03-111%E5%AD%B8%E6%B8%AC%E6%95%B8%E5%AD%B8a%E8%A9%A6%E5%8D%B7%E5%AE%9A%E7%A8%BF.pdf",
+      "sha256": "01ceb21ac453e1b8f1e2cdbc015f0d648f3b63c72d5d0c64555d6fd085c5aa9f"
+    },
+    {
+      "id": "math-a-answers",
+      "url": "https://www.ceec.edu.tw/files/file_pool/1/0m053361187672613478/03-111%E5%AD%B8%E6%B8%AC%E6%95%B8%E5%AD%B8a%E9%81%B8%E6%93%87%28%E5%A1%AB%29%E9%A1%8C%E7%AD%94%E6%A1%88.pdf",
+      "sha256": "176497242f9910d56ba0441bddae22ea9be597e48b6a3239ebb19860b11b6c1c"
+    },
+    {
+      "id": "math-a-written-rubric",
+      "url": "https://www.ceec.edu.tw/files/file_pool/1/0m053361096038734441/03-111%E5%AD%B8%E6%B8%AC%E6%95%B8%E5%AD%B8a%E9%9D%9E%E9%81%B8%E6%93%87%E9%A1%8C%E8%A9%95%E5%88%86%E5%8E%9F%E5%89%87.pdf",
+      "sha256": "dd5905060a7eaeb04e994dc27ad08ef5b763dc704db33098839550d65b653015"
+    },
+    {
+      "id": "math-b-questions",
+      "url": "https://www.ceec.edu.tw/files/file_pool/1/0m053362985668390981/04-111%E5%AD%B8%E6%B8%AC%E6%95%B8%E5%AD%B8b%E8%A9%A6%E5%8D%B7.pdf",
+      "sha256": "8752c7cb744419c301f1b495e5880143cd115163ea3275560de31acead73772b"
+    },
+    {
+      "id": "math-b-answers",
+      "url": "https://www.ceec.edu.tw/files/file_pool/1/0m053363176747148935/04-111%E5%AD%B8%E6%B8%AC%E6%95%B8%E5%AD%B8b%E9%81%B8%E6%93%87%28%E5%A1%AB%29%E9%A1%8C%E7%AD%94%E6%A1%88.pdf",
+      "sha256": "bbcc536620e410692235de6c92896e7a1c8afde85da13380d540e2d5aa9b22a2"
+    },
+    {
+      "id": "math-b-written-rubric",
+      "url": "https://www.ceec.edu.tw/files/file_pool/1/0m053363287381026953/04-111%E5%AD%B8%E6%B8%AC%E6%95%B8%E5%AD%B8b%E9%9D%9E%E9%81%B8%E6%93%87%E9%A1%8C%E8%A9%95%E5%88%86%E5%8E%9F%E5%89%87.pdf",
+      "sha256": "62375e3c3510fbb8d5235debcbdd3753409fe123ab63b398b2882cda342c7d1d"
+    },
+    {
+      "id": "work-report",
+      "url": "https://www.ceec.edu.tw/files/file_pool/1/0m214373166642054972/111%E5%AD%B8%E5%B9%B4%E5%BA%A6%E5%AD%B8%E7%A7%91%E8%83%BD%E5%8A%9B%E6%B8%AC%E9%A9%97%E5%B7%A5%E4%BD%9C%E5%A0%B1%E5%91%8A%28%E5%85%AC%E5%91%8A%29_11107.pdf",
+      "sha256": "784898a1b58c46042bf45ed899bf3e408d53e0028b648426def8f9386381dbf1"
+    }
+  ]
+}

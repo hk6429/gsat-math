@@ -6,6 +6,10 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("../", import.meta.url));
 const year = Number(process.argv[2]);
 const layouts = {
+  111: {
+    A: { gapBeforeNext: { 6: 135, 12: 145 } },
+    B: { gapBeforeNext: { 12: 145 } }
+  },
   112: {
     A: { gapBeforeNext: { 6: 135, 12: 145 } },
     B: { gapBeforeNext: { 12: 145 } }
