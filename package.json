@@ -4,6 +4,7 @@
   "private": true,
   "description": "大學學測數學考古題互動練習網站",
   "scripts": {
+    "build": "node scripts/build.mjs",
     "crop:115": "node scripts/crop-115.mjs",
     "test": "node --test",
     "serve": "npx serve ."
@@ -12,4 +13,3 @@
     "node": ">=22"
   }
 }
-
