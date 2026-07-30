@@ -75,7 +75,10 @@
       <p class="count" id="filterSummary"></p>
 
       <div id="filterBody">
-        <p class="filter-note">勾選想練的分類，或直接調整下方條件。</p>
+        <div class="filter-lead">
+          <span>勾選想練的分類，或直接調整下方條件</span>
+          <button class="text-toggle" id="allToggle" type="button">全選／清除</button>
+        </div>
         <div id="categoryGroups"></div>
         <div class="filter-controls">
           <label>年份：<select id="yearSel"></select></label>
@@ -98,6 +101,8 @@
 
       <div class="btn-row">
         <button class="btn btn-outline" id="startBtn" type="button">開始練習</button>
+        <button class="btn btn-sub" id="wrongBtn" type="button">錯題本（<span id="wrongCount">0</span>）</button>
+        <button class="btn btn-sub" id="historyBtn" type="button">學習歷程</button>
         <button class="text-toggle" id="moreToggle" type="button" aria-expanded="false" aria-controls="moreTools">更多功能 ▾</button>
       </div>
       <div id="moreTools" class="more-tools" hidden>
@@ -105,8 +110,6 @@
         <button class="btn btn-sub" id="mockBtn" type="button">開始整回模考</button>
         <button class="btn btn-sub" id="paperBtn" type="button">出卷模式（老師）</button>
         <button class="btn btn-sub" id="rankingBtn" type="button">難度排行榜</button>
-        <button class="btn btn-sub" id="wrongBtn" type="button">錯題本（<span id="wrongCount">0</span>）</button>
-        <button class="btn btn-sub" id="historyBtn" type="button">學習歷程</button>
       </div>
     </section>
 

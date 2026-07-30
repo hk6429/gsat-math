@@ -180,20 +180,26 @@ html.fs-xl body { font-size: 1.3rem; }
   background: transparent; cursor: pointer; font-size: .82rem;
 }
 .count { margin: 0 0 10px; color: var(--muted); font-size: .9rem; }
+.filter-lead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 5px;
+  color: var(--muted);
+  font-size: .85rem;
+}
 .catgroup { border-top: 1px solid color-mix(in srgb, var(--line) 70%, transparent); }
 .catgroup:last-child { border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent); }
-.catgroup summary {
-  display: grid;
-  grid-template-columns: 12px 1fr auto;
+.gtitle {
+  display: flex;
   align-items: center;
   gap: 9px;
   min-height: 42px;
-  list-style: none;
-  cursor: pointer;
 }
-.catgroup summary::-webkit-details-marker { display: none; }
-.catgroup summary span:last-child { color: var(--muted); font-size: .75rem; }
-.catgroup[open] summary span:last-child::before { content: "收合"; font-size: 0; }
+.gtitle b { margin-right: auto; }
+.gtitle .text-toggle { min-height: 34px; padding-inline: 2px; font-size: .75rem; }
+.gtitle .expand-toggle { margin-left: 2px; }
 .catdot { width: 9px; height: 9px; border-radius: 3px; background: #d7c5a5; }
 .catdot-1 { background: #c9dab5; }
 .catdot-2 { background: #b9d6d4; }
@@ -202,15 +208,6 @@ html.fs-xl body { font-size: 1.3rem; }
 .catdot-5 { background: #e5c0cf; }
 .catdot-6 { background: #e4d1b8; }
 .catdot-7 { background: #ccd5c7; }
-.cat-actions { display: flex; gap: 12px; margin: 0 0 7px 21px; }
-.cat-actions button {
-  padding: 0;
-  border: 0;
-  color: var(--muted);
-  background: transparent;
-  cursor: pointer;
-  font-size: .74rem;
-}
 .tag-checks { display: flex; flex-wrap: wrap; gap: 7px 16px; padding: 0 0 12px 21px; }
 .tag-checks label { color: var(--ink); font-size: .8rem; }
 .filter-controls {

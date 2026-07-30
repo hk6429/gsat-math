@@ -42,11 +42,16 @@
       });
     }
     $("categoryGroups").innerHTML = [...categoryMap.entries()].map(([cat, tags], index) => `
-      <details class="catgroup">
-        <summary><span class="catdot catdot-${index % 8}"></span><b>${escapeHtml(cat)}</b><span>展開細項</span></summary>
-        <div class="cat-actions"><button type="button" data-cat-all="${escapeHtml(cat)}">全選</button><button type="button" data-cat-clear="${escapeHtml(cat)}">清除</button></div>
-        <div class="tag-checks">${[...tags].sort().map((tag) => `<label><input class="tagCheck" type="checkbox" data-cat="${escapeHtml(cat)}" value="${escapeHtml(tag)}" checked> ${escapeHtml(tag)}</label>`).join("")}</div>
-      </details>`).join("");
+      <div class="catgroup">
+        <div class="gtitle">
+          <span class="catdot catdot-${index % 8}"></span>
+          <b>${escapeHtml(cat)}</b>
+          <button class="text-toggle" type="button" data-cat-all="${escapeHtml(cat)}">全選</button>
+          <button class="text-toggle" type="button" data-cat-clear="${escapeHtml(cat)}">清除</button>
+          <button class="text-toggle expand-toggle" type="button" data-cat-expand="${escapeHtml(cat)}" aria-expanded="false">展開細項 ▾</button>
+        </div>
+        <div class="tag-checks" data-cat-tags="${escapeHtml(cat)}" hidden>${[...tags].sort().map((tag) => `<label><input class="tagCheck" type="checkbox" data-cat="${escapeHtml(cat)}" value="${escapeHtml(tag)}" checked> ${escapeHtml(tag)}</label>`).join("")}</div>
+      </div>`).join("");
   }
 
   function updateStats() {
@@ -93,16 +98,20 @@
 
   function updateFilterSummary() {
     const pool = filtered();
-    const totalTags = document.querySelectorAll(".tagCheck").length;
+    const allCategories = new Set(allQuestions.map((q) => q.cat));
+    const activeCategories = new Set([...state.activeTags].map((key) => key.split("::")[0]));
+    const bodyExpanded = !$("filterBody").hidden;
+    $("filterSummary").hidden = bodyExpanded;
     const parts = [
       `年份 ${selectedText("yearSel")}`,
       `考科 ${selectedText("subjectSel")}`,
-      `分類 ${state.activeTags.size}/${totalTags}`,
+      `分類 ${activeCategories.size}/${allCategories.size} 類`,
       `每次 ${$("questionLimit").value || 10} 題`,
       $("shuffleCheck").checked ? "隨機" : "依題號",
-      `難度 ${selectedText("diffSel")}`
+      `難度 ${selectedText("diffSel")}`,
+      `鑑別度 ${selectedText("discSel")}`
     ];
-    $("filterSummary").textContent = parts.join("・");
+    $("filterSummary").textContent = parts.join(" ・ ");
     $("countInfo").textContent = `符合條件且尚未被題數上限截斷：${pool.length} 題（題庫總計 ${allQuestions.length} 題）`;
   }
 
@@ -310,6 +319,23 @@
     [...document.querySelectorAll(".tagCheck")].filter((box) => box.dataset.cat === button.dataset.catClear).forEach((box) => { box.checked = false; state.activeTags.delete(`${box.dataset.cat}::${box.value}`); });
     updateFilterSummary();
   }));
+  document.querySelectorAll("[data-cat-expand]").forEach((button) => button.addEventListener("click", () => {
+    const tags = document.querySelector(`[data-cat-tags="${CSS.escape(button.dataset.catExpand)}"]`);
+    const expanded = button.getAttribute("aria-expanded") === "true";
+    tags.hidden = expanded;
+    button.setAttribute("aria-expanded", String(!expanded));
+    button.textContent = expanded ? "展開細項 ▾" : "收合細項 ▴";
+  }));
+  $("allToggle").addEventListener("click", () => {
+    const boxes = [...document.querySelectorAll(".tagCheck")];
+    const selectAll = boxes.some((box) => !box.checked);
+    boxes.forEach((box) => {
+      box.checked = selectAll;
+      const key = `${box.dataset.cat}::${box.value}`;
+      if (selectAll) state.activeTags.add(key); else state.activeTags.delete(key);
+    });
+    updateFilterSummary();
+  });
   ["yearSel","subjectSel","questionLimit","shuffleCheck","timedCheck","diffSel","discSel","excludeDone","easyFirst"].forEach((id) => $(id).addEventListener("change", updateFilterSummary));
   document.querySelectorAll(".kindCheck").forEach((box) => box.addEventListener("change", updateFilterSummary));
 
@@ -343,6 +369,7 @@
     $("filterBody").hidden = expanded;
     $("advToggle").setAttribute("aria-expanded", String(!expanded));
     $("advToggle").textContent = expanded ? "展開進階篩選 ▾" : "收合進階篩選 ▴";
+    updateFilterSummary();
   });
   $("moreToggle").addEventListener("click", () => {
     const expanded = $("moreToggle").getAttribute("aria-expanded") === "true";
