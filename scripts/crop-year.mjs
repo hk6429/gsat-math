@@ -6,6 +6,18 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("../", import.meta.url));
 const year = Number(process.argv[2]);
 const layouts = {
+  83: {
+    M: {
+      sourceFile: "math-questions.pdf",
+      firstPage: 3,
+      lastPage: 6,
+      questionXMin: 85,
+      questionXMax: 108,
+      numericOffsetFromPage: { page: 5, offset: 10, firstPageYMin: 400 },
+      gapBeforeNext: { 7: 210, 10: 250 },
+      hasGroupImage: false
+    }
+  },
   84: {
     M: {
       sourceFile: "math-questions.pdf",
@@ -323,7 +335,15 @@ const pageWidth = 595.275;
 const renderedWidth = 1191;
 const scale = renderedWidth / pageWidth;
 
-function startsForPage(pdf, page, fillStartNo, questionXMin = 58, questionXMax = 78) {
+function startsForPage(
+  pdf,
+  page,
+  fillStartNo,
+  questionXMin = 58,
+  questionXMax = 78,
+  numericOffset = 0,
+  numericOffsetYMin = 0
+) {
   const html = execFileSync("pdftotext", [
     "-f", String(page),
     "-l", String(page),
@@ -345,7 +365,7 @@ function startsForPage(pdf, page, fillStartNo, questionXMin = 58, questionXMax =
     const numeric = text.match(/^(\d{1,2})\.$/);
     const letter = fillStartNo ? text.match(/^([A-Z])\.$/) : null;
     const no = numeric
-      ? Number(numeric[1])
+      ? Number(numeric[1]) + (y >= numericOffsetYMin ? numericOffset : 0)
       : letter
         ? fillStartNo + letter[1].charCodeAt(0) - "A".charCodeAt(0)
         : 0;
@@ -377,7 +397,13 @@ for (const subject of Object.keys(layouts[year])) {
       page,
       config.fillStartNo,
       config.questionXMin,
-      config.questionXMax
+      config.questionXMax,
+      config.numericOffsetFromPage && page >= config.numericOffsetFromPage.page
+        ? config.numericOffsetFromPage.offset
+        : 0,
+      config.numericOffsetFromPage && page === config.numericOffsetFromPage.page
+        ? config.numericOffsetFromPage.firstPageYMin || 0
+        : 0
     ));
   }
   starts.sort((a, b) => a.no - b.no);
