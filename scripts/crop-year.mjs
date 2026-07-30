@@ -6,6 +6,21 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("../", import.meta.url));
 const year = Number(process.argv[2]);
 const layouts = {
+  99: {
+    M: {
+      sourceFile: "math-questions.pdf",
+      firstPage: 2,
+      lastPage: 7,
+      fillStartNo: 13,
+      questionXMin: 80,
+      questionXMax: 100,
+      cropX: 140,
+      cropWidth: 1000,
+      pageBottom: 1480,
+      gapBeforeNext: { 7: 230, 12: 210, 15: 150, 18: 70 },
+      hasGroupImage: false
+    }
+  },
   100: {
     M: {
       sourceFile: "math-questions.pdf",
@@ -146,10 +161,8 @@ const sourceDir = join(root, ".sources", String(year));
 const pageWidth = 595.275;
 const renderedWidth = 1191;
 const scale = renderedWidth / pageWidth;
-const cropX = 108;
-const cropWidth = 972;
 
-function startsForPage(pdf, page, fillStartNo) {
+function startsForPage(pdf, page, fillStartNo, questionXMin = 58, questionXMax = 78) {
   const html = execFileSync("pdftotext", [
     "-f", String(page),
     "-l", String(page),
@@ -162,7 +175,7 @@ function startsForPage(pdf, page, fillStartNo) {
   for (const match of html.matchAll(word)) {
     const x = Number(match[1]);
     const y = Number(match[2]);
-    if (x < 58 || x > 78) continue;
+    if (x < questionXMin || x > questionXMax) continue;
     const key = [...rows.keys()].find((value) => Math.abs(value - y) < 0.6) ?? y;
     rows.set(key, `${rows.get(key) || ""}${match[3]}`);
   }
@@ -187,6 +200,8 @@ for (const subject of Object.keys(layouts[year])) {
   const out = join(root, "img", `${year}${subject}`);
   const firstPage = config.firstPage || 2;
   const lastPage = config.lastPage || 7;
+  const cropX = config.cropX || 108;
+  const cropWidth = config.cropWidth || 972;
   rmSync(pages, { recursive: true, force: true });
   mkdirSync(pages, { recursive: true });
   mkdirSync(out, { recursive: true });
@@ -196,7 +211,13 @@ for (const subject of Object.keys(layouts[year])) {
 
   const starts = [];
   for (let page = firstPage; page <= lastPage; page += 1) {
-    starts.push(...startsForPage(pdf, page, config.fillStartNo));
+    starts.push(...startsForPage(
+      pdf,
+      page,
+      config.fillStartNo,
+      config.questionXMin,
+      config.questionXMax
+    ));
   }
   starts.sort((a, b) => a.no - b.no);
   if (starts.length !== 20 || new Set(starts.map((item) => item.no)).size !== 20) {
@@ -207,7 +228,7 @@ for (const subject of Object.keys(layouts[year])) {
     const current = starts[i];
     const next = starts[i + 1];
     const top = Math.max(115, Math.round(current.y * scale) - 18);
-    let bottom = 1570;
+    let bottom = config.pageBottom || 1570;
     if (next && next.page === current.page) {
       bottom = Math.round(next.y * scale) - 16 - (config.gapBeforeNext[current.no] || 0);
     }
