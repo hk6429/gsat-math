@@ -1,0 +1,15 @@
+{
+  "name": "gsat-math",
+  "version": "0.1.0",
+  "private": true,
+  "description": "大學學測數學考古題互動練習網站",
+  "scripts": {
+    "crop:115": "node scripts/crop-115.mjs",
+    "test": "node --test",
+    "serve": "npx serve ."
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
+

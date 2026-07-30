@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>查題校對｜學測數學考古題</title>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="index.html"><span class="brand-mark">∑</span><span>學測數學考古題</span></a>
+      <nav class="nav" aria-label="主要導覽"><a href="index.html">練習</a><a href="check" aria-current="page">查題</a><a href="about.html">關於</a></nav>
+    </div>
+  </header>
+  <main class="content-page">
+    <p class="eyebrow">QUESTION CHECK</p>
+    <h1>查題校對</h1>
+    <p>輸入考科與題號，直接檢查官方題面、答案與統計資料。</p>
+    <form class="lookup" id="lookupForm">
+      <select id="lookupSubject" aria-label="考科"><option value="A">數學 A</option><option value="B">數學 B</option></select>
+      <input id="lookupNo" type="number" min="1" max="20" value="1" aria-label="題號">
+      <button class="btn" type="submit">查詢</button>
+    </form>
+    <div id="lookupResult"></div>
+  </main>
+  <script src="data/bank.js"></script>
+  <script>
+    (() => {
+      const params = new URLSearchParams(location.search);
+      const subject = document.getElementById("lookupSubject");
+      const no = document.getElementById("lookupNo");
+      subject.value = params.get("subject") || "A";
+      no.value = params.get("no") || "1";
+      function render() {
+        const exam = window.MATH_BANK.find((item) => item.subject === subject.value);
+        const q = exam?.questions.find((item) => item.no === Number(no.value));
+        const target = document.getElementById("lookupResult");
+        if (!q) { target.innerHTML = '<div class="panel empty">找不到這一題。</div>'; return; }
+        const group = q.groupImage ? `<img class="group-image" src="${q.groupImage}" alt="第 18 至 20 題共用題組材料">` : "";
+        target.innerHTML = `<article class="panel question-card"><p class="eyebrow">115 學年度・數學 ${exam.subject}</p><h2>第 ${q.no} 題｜${q.summary}</h2><div class="chips"><span class="chip">${q.cat}</span><span class="chip">${q.tags[0]}</span></div>${group}<img class="question-image" src="${q.image}" alt="官方題面"><div class="notice" style="margin-top:20px"><b>官方答案：${q.answer}</b>${q.pass == null ? "" : `<br>${q.kind === "multi" ? "得分率" : "答對率"} P：${Math.round(q.pass*100)}%；鑑別度 D：${Math.round(q.disc*100)}`}${q.rubricUrl ? `<br><a href="${q.rubricUrl}" target="_blank" rel="noopener">查看官方評分原則</a>` : ""}</div></article>`;
+      }
+      document.getElementById("lookupForm").addEventListener("submit", (event) => { event.preventDefault(); render(); });
+      render();
+    })();
+  </script>
+</body>
+</html>

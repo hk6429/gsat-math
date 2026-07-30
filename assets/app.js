@@ -1,0 +1,162 @@
+(() => {
+  const exams = window.MATH_BANK || [];
+  const allQuestions = exams.flatMap((exam) => exam.questions.map((q) => ({ ...q, exam })));
+  const state = { pool: [], index: 0, selected: new Set() };
+  const $ = (id) => document.getElementById(id);
+
+  const safeStorage = {
+    get(key) {
+      try { return JSON.parse(localStorage.getItem(key) || "null"); } catch { return null; }
+    },
+    set(key, value) {
+      try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* 作答不能因儲存失敗中斷 */ }
+    }
+  };
+
+  function kindLabel(kind) {
+    return { single: "單選題", multi: "多選題", fill: "選填題", written: "非選擇題" }[kind] || kind;
+  }
+
+  function difficulty(q) {
+    if (q.pass == null) return "未提供";
+    if (q.pass >= .7) return "較易";
+    if (q.pass >= .4) return "中等";
+    return "較難";
+  }
+
+  function populateFilters() {
+    const cats = [...new Set(allQuestions.map((q) => q.cat))].sort();
+    $("catSel").innerHTML = '<option value="all">全部單元</option>' + cats.map((cat) => `<option>${cat}</option>`).join("");
+  }
+
+  function filtered() {
+    const subject = $("subjectSel").value;
+    const cat = $("catSel").value;
+    const kind = $("kindSel").value;
+    const diff = $("diffSel").value;
+    return allQuestions.filter((q) => {
+      if (subject !== "all" && q.exam.subject !== subject) return false;
+      if (cat !== "all" && q.cat !== cat) return false;
+      if (kind !== "all" && q.kind !== kind) return false;
+      if (diff !== "all" && difficulty(q) !== diff) return false;
+      return true;
+    });
+  }
+
+  function normalize(value) {
+    return String(value)
+      .trim()
+      .replaceAll("，", ",")
+      .replaceAll("、", ",")
+      .replace(/\s+/g, "")
+      .toLowerCase();
+  }
+
+  function render() {
+    const q = state.pool[state.index];
+    if (!q) {
+      $("questionArea").innerHTML = '<div class="panel empty">目前條件沒有符合的題目，請調整篩選。</div>';
+      return;
+    }
+    state.selected.clear();
+    const stats = q.pass == null ? "" : `
+      <div class="meta-grid">
+        <div class="meta-box"><b>${Math.round(q.pass * 100)}%</b><span>${q.kind === "multi" ? "官方得分率 P" : "官方答對率 P"}</span></div>
+        <div class="meta-box"><b>${Math.round(q.disc * 100)}</b><span>官方鑑別度 D</span></div>
+        <div class="meta-box"><b>${difficulty(q)}</b><span>依 P 值分級</span></div>
+      </div>`;
+    const group = q.groupImage ? `<img class="group-image" src="${q.groupImage}" alt="第 18 至 20 題共用題組材料">` : "";
+    $("questionArea").innerHTML = `
+      <article class="panel question-card">
+        <div class="question-head">
+          <div>
+            <p class="eyebrow">${q.exam.year} 學年度・數學 ${q.exam.subject}</p>
+            <h2 class="question-title">第 ${q.no} 題｜${q.summary}</h2>
+            <div class="chips">
+              <span class="chip">${q.cat}</span>
+              <span class="chip">${q.tags[0]}</span>
+              <span class="chip accent">${kindLabel(q.kind)}</span>
+            </div>
+          </div>
+          <div class="counter">${state.index + 1} / ${state.pool.length}</div>
+        </div>
+        ${group}
+        <img class="question-image" src="${q.image}" alt="${q.exam.year} 學年度數學 ${q.exam.subject} 第 ${q.no} 題官方題面">
+        <div class="answer-zone">${answerControl(q)}</div>
+        <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+        ${stats}
+        <div class="btn-row">
+          <button class="btn ghost" id="prevBtn" type="button">上一題</button>
+          <button class="btn secondary" id="nextBtn" type="button">下一題</button>
+          <a class="btn ghost" href="check?subject=${q.exam.subject}&no=${q.no}" style="text-decoration:none">查題校對</a>
+        </div>
+      </article>`;
+    bindQuestion(q);
+  }
+
+  function answerControl(q) {
+    if (q.kind === "single" || q.kind === "multi") {
+      const buttons = Array.from({ length: q.optionCount }, (_, i) => `<button class="choice" type="button" data-choice="${i + 1}" aria-pressed="false">${i + 1}</button>`).join("");
+      return `<p>${q.kind === "multi" ? "可複選，選好後送出。" : "請選一個答案。"}</p><div class="choice-grid">${buttons}</div><div class="btn-row"><button class="btn" id="submitBtn" type="button">送出答案</button></div>`;
+    }
+    if (q.kind === "fill") {
+      return `<label for="fillAnswer"><b>輸入答案</b>（分數可用 /，根號可用 √）</label><input id="fillAnswer" type="text" inputmode="text" autocomplete="off"><div class="btn-row"><button class="btn" id="submitBtn" type="button">送出答案</button></div>`;
+    }
+    return `<p>非選擇題需依推理過程評分，本站不以單一數字自動給分。</p><a class="btn" href="${q.rubricUrl}" target="_blank" rel="noopener" style="display:inline-flex;text-decoration:none">查看官方評分原則</a>`;
+  }
+
+  function bindQuestion(q) {
+    document.querySelectorAll(".choice").forEach((button) => {
+      button.addEventListener("click", () => {
+        const value = button.dataset.choice;
+        if (q.kind === "single") {
+          state.selected.clear();
+          document.querySelectorAll(".choice").forEach((item) => {
+            item.classList.remove("selected");
+            item.setAttribute("aria-pressed", "false");
+          });
+        }
+        if (state.selected.has(value)) {
+          state.selected.delete(value);
+          button.classList.remove("selected");
+          button.setAttribute("aria-pressed", "false");
+        } else {
+          state.selected.add(value);
+          button.classList.add("selected");
+          button.setAttribute("aria-pressed", "true");
+        }
+      });
+    });
+    $("submitBtn")?.addEventListener("click", () => check(q));
+    $("prevBtn").addEventListener("click", () => { state.index = Math.max(0, state.index - 1); render(); });
+    $("nextBtn").addEventListener("click", () => { state.index = Math.min(state.pool.length - 1, state.index + 1); render(); });
+  }
+
+  function check(q) {
+    let response = "";
+    if (q.kind === "fill") response = $("fillAnswer").value;
+    else response = [...state.selected].sort((a, b) => Number(a) - Number(b)).join(",");
+    const ok = normalize(response) === normalize(q.answer);
+    const feedback = $("feedback");
+    feedback.className = `feedback show ${ok ? "ok" : "bad"}`;
+    feedback.textContent = ok ? "✓ 答對了！" : `✗ 再想想看。官方答案：${q.answer}`;
+    const history = safeStorage.get("gsatMathProgress") || [];
+    history.push({ year: q.exam.year, subject: q.exam.subject, no: q.no, ok, at: new Date().toISOString() });
+    safeStorage.set("gsatMathProgress", history.slice(-500));
+  }
+
+  function start() {
+    state.pool = filtered();
+    state.index = 0;
+    render();
+  }
+
+  populateFilters();
+  ["subjectSel", "catSel", "kindSel", "diffSel"].forEach((id) => $(id).addEventListener("change", start));
+  $("shuffleBtn").addEventListener("click", () => {
+    state.pool = filtered().sort(() => Math.random() - .5);
+    state.index = 0;
+    render();
+  });
+  start();
+})();
