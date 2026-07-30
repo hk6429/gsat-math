@@ -6,6 +6,16 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("../", import.meta.url));
 const year = Number(process.argv[2]);
 const layouts = {
+  98: {
+    M: {
+      sourceFile: "math-questions.pdf",
+      firstPage: 2,
+      lastPage: 7,
+      fillStartNo: 12,
+      gapBeforeNext: { 6: 230, 9: 80, 11: 210 },
+      hasGroupImage: false
+    }
+  },
   99: {
     M: {
       sourceFile: "math-questions.pdf",
