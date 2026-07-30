@@ -60,6 +60,24 @@
     });
   }
 
+  function selectedText(id) {
+    const select = $(id);
+    return select?.options[select.selectedIndex]?.text || "全部";
+  }
+
+  function updateFilterSummary() {
+    const pool = filtered();
+    const parts = [
+      selectedText("yearSel"),
+      selectedText("subjectSel"),
+      selectedText("catSel"),
+      selectedText("kindSel"),
+      selectedText("diffSel")
+    ];
+    $("filterSummary").textContent = `${parts.join("・")}｜符合 ${pool.length} 題`;
+    $("countInfo").textContent = `目前條件共 ${pool.length} 題；按「開始練習」依題號作答，或按「隨機排序」打散順序。`;
+  }
+
   function normalize(value) {
     return String(value)
       .trim()
@@ -162,19 +180,52 @@
     safeStorage.set("gsatMathProgress", history.slice(-500));
   }
 
-  function start() {
+  function start({ shuffle = false, limit = null, focus = false } = {}) {
     state.pool = filtered();
+    if (shuffle) state.pool = [...state.pool].sort(() => Math.random() - .5);
+    if (limit != null) state.pool = state.pool.slice(0, limit);
     state.index = 0;
     render();
+    updateFilterSummary();
+    if (focus) $("questionArea").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   populateFilters();
   updateStats();
-  ["yearSel", "subjectSel", "catSel", "kindSel", "diffSel"].forEach((id) => $(id).addEventListener("change", start));
+  ["yearSel", "subjectSel", "catSel", "kindSel", "diffSel"].forEach((id) => $(id).addEventListener("change", () => {
+    updateFilterSummary();
+    start();
+  }));
+  $("startBtn").addEventListener("click", () => start({ focus: true }));
   $("shuffleBtn").addEventListener("click", () => {
-    state.pool = filtered().sort(() => Math.random() - .5);
-    state.index = 0;
-    render();
+    start({ shuffle: true, focus: true });
   });
+  $("quickStartBtn").addEventListener("click", () => start({ shuffle: true, limit: 10, focus: true }));
+
+  $("advToggle").addEventListener("click", () => {
+    const body = $("filterBody");
+    const expanded = $("advToggle").getAttribute("aria-expanded") === "true";
+    body.hidden = expanded;
+    $("advToggle").setAttribute("aria-expanded", String(!expanded));
+    $("advToggle").textContent = expanded ? "展開進階篩選 ▾" : "收合進階篩選 ▴";
+  });
+
+  const savedFontSize = safeStorage.get("gsatMathFontSize");
+  if (["fs-lg", "fs-xl"].includes(savedFontSize)) document.documentElement.classList.add(savedFontSize);
+  $("fsFold").addEventListener("click", () => {
+    const folded = $("fsCtrl").classList.toggle("folded");
+    $("fsFold").setAttribute("aria-expanded", String(!folded));
+  });
+  [
+    ["fsSmall", ""],
+    ["fsLarge", "fs-lg"],
+    ["fsXLarge", "fs-xl"]
+  ].forEach(([id, className]) => $(id).addEventListener("click", () => {
+    document.documentElement.classList.remove("fs-lg", "fs-xl");
+    if (className) document.documentElement.classList.add(className);
+    safeStorage.set("gsatMathFontSize", className);
+  }));
+
+  updateFilterSummary();
   start();
 })();

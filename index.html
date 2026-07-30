@@ -2,29 +2,51 @@
 <html lang="zh-Hant-TW">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>學測數學考古題｜數學 A・數學 B</title>
-  <meta name="description" content="大考中心正式學測數學 A、數學 B 歷屆試題互動練習，含官方答案、答對率與鑑別度。">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>學測數學題庫｜數學 A・數學 B 考古題練習</title>
+  <meta name="description" content="免費線上練習大考中心正式學測數學 A、數學 B 歷屆試題，含官方答案、答對率與鑑別度，免註冊。">
+  <meta name="theme-color" content="#eef1f7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#10131f" media="(prefers-color-scheme: dark)">
   <link rel="canonical" href="https://gsat-math.vercel.app/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="學測數學題庫｜數學 A・數學 B 考古題練習">
+  <meta property="og:description" content="學測數學 A、數學 B 歷屆考古題免費練，附大考中心官方答案、答對率與鑑別度，免註冊。">
+  <meta property="og:url" content="https://gsat-math.vercel.app/">
+  <meta property="og:site_name" content="學測數學題庫">
+  <meta property="og:locale" content="zh_TW">
   <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="shell">
-      <a class="brand" href="index.html"><span class="brand-mark">∑</span><span>學測數學考古題</span></a>
-      <nav class="nav" aria-label="主要導覽">
-        <a href="index.html" aria-current="page">練習</a>
-        <a href="check">查題</a>
-        <a href="about.html">關於</a>
-      </nav>
+  <a class="skiplink" href="#main">跳到主要內容</a>
+  <div id="srLive" class="sr-only" aria-live="assertive"></div>
+  <a class="checklink no-print" href="check" title="輸入年份與題號快速查題校對">查題校對</a>
+
+  <div class="fontsize-ctrl folded no-print" role="group" aria-label="調整文字大小" id="fsCtrl">
+    <button type="button" id="fsFold" aria-label="展開文字大小選項" aria-expanded="false">Aa</button>
+    <button type="button" id="fsSmall" class="fs-opt" aria-label="標準字級">A</button>
+    <button type="button" id="fsLarge" class="fs-opt" aria-label="放大字級">A+</button>
+    <button type="button" id="fsXLarge" class="fs-opt" aria-label="更大字級">A++</button>
+  </div>
+
+  <header class="hero-header">
+    <div class="formula-field" aria-hidden="true">
+      <span>∑</span><span>π</span><span>√x</span><span>f(x)</span><span>∞</span><span>△</span>
+    </div>
+    <div class="htext">
+      <h1>學測數學題庫</h1>
+      <p>大學學測歷屆數學 A・數學 B 試題（考古題）　分類練習系統</p>
     </div>
   </header>
 
-  <main>
-    <section class="hero shell">
-      <p class="eyebrow">GSAT MATH ARCHIVE</p>
-      <h1>公式不失真，答案有憑據。</h1>
-      <p class="lede">把大考中心正式數學 A、數學 B 原卷變成可練習、可篩選、可核對的免費題庫。先忠實呈現，再談聰明功能。</p>
+  <main class="wrap" id="main">
+    <noscript>
+      <div class="introbox">本站需開啟 JavaScript 才能載入題庫與進行作答，請於瀏覽器啟用 JavaScript。</div>
+    </noscript>
+
+    <section class="introbox no-print" aria-labelledby="archiveHeading">
+      <h2 id="archiveHeading">學測數學 A・數學 B 歷屆考古題．逐題附官方資料</h2>
+      <p><b>這是什麼？</b>從大考中心正式試題中挑選年份、考科、單元與題型，當場作答、立刻核對；題面保留公式、圖表、矩陣與選填格式。</p>
+      <p><b>不需登入，不會上傳個人資料</b>——作答紀錄只存在你這台裝置的瀏覽器裡。</p>
       <div class="stat-strip" aria-label="題庫統計">
         <div class="stat"><b id="questionCount">—</b><span>已收錄題目</span></div>
         <div class="stat"><b id="answerCount">—</b><span>選填題官方答案已比對</span></div>
@@ -33,22 +55,50 @@
       </div>
     </section>
 
-    <section class="workspace shell">
-      <aside class="panel filters">
-        <h2>篩選題目</h2>
-        <div class="field"><label for="yearSel">年份</label><select id="yearSel"></select></div>
-        <div class="field"><label for="subjectSel">考科</label><select id="subjectSel"></select></div>
-        <div class="field"><label for="catSel">單元</label><select id="catSel"></select></div>
-        <div class="field"><label for="kindSel">題型</label><select id="kindSel"><option value="all">全部題型</option><option value="single">單選題</option><option value="multi">多選題</option><option value="fill">選填題</option><option value="written">非選擇題</option></select></div>
-        <div class="field"><label for="diffSel">難度</label><select id="diffSel"><option value="all">全部難度</option><option>較易</option><option>中等</option><option>較難</option></select></div>
-        <div class="btn-row"><button class="btn" id="shuffleBtn" type="button">隨機排序</button></div>
-        <p class="filter-note">難度依大考中心 P 值分級：70% 以上較易、40%～未滿 70% 中等、未滿 40% 較難。多選題 P 為得分率。</p>
-      </aside>
-      <div id="questionArea" aria-live="polite"></div>
+    <section class="quickstart no-print" aria-labelledby="quickStartHeading">
+      <h2 class="sr-only" id="quickStartHeading">快速開始</h2>
+      <button class="btn btn-main" id="quickStartBtn" type="button">立即開始・隨機 10 題</button>
+      <p>不知道要練什麼？按這裡最快。想加強特定年份、單元或難度，再往下設定篩選條件。</p>
     </section>
+
+    <section class="panel filters no-print" id="filterPanel" aria-labelledby="filterHeading">
+      <div class="toolrow">
+        <h2 id="filterHeading">選擇範圍</h2>
+        <button class="text-toggle" id="advToggle" type="button" aria-expanded="false" aria-controls="filterBody">展開進階篩選 ▾</button>
+      </div>
+      <p class="count" id="filterSummary"></p>
+
+      <div id="filterBody" hidden>
+        <div class="filter-grid">
+          <div class="field"><label for="yearSel">年份</label><select id="yearSel"></select></div>
+          <div class="field"><label for="subjectSel">考科</label><select id="subjectSel"></select></div>
+          <div class="field"><label for="catSel">單元</label><select id="catSel"></select></div>
+          <div class="field"><label for="kindSel">題型</label><select id="kindSel"><option value="all">全部題型</option><option value="single">單選題</option><option value="multi">多選題</option><option value="fill">選填題</option><option value="written">非選擇題</option></select></div>
+          <div class="field"><label for="diffSel">難度</label><select id="diffSel"><option value="all">全部難度</option><option>較易</option><option>中等</option><option>較難</option></select></div>
+        </div>
+        <p class="filter-note">難度依大考中心 P 值分級：70% 以上較易、40%～未滿 70% 中等、未滿 40% 較難。多選題 P 為得分率。</p>
+        <p class="count" id="countInfo"></p>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-outline" id="startBtn" type="button">開始練習</button>
+        <button class="btn btn-sub" id="shuffleBtn" type="button">隨機排序</button>
+      </div>
+    </section>
+
+    <section id="questionArea" aria-live="polite" aria-label="題目練習"></section>
+
+    <footer class="footer">
+      題目來源：大學入學考試中心學科能力測驗歷屆試題；本站與大考中心無隸屬關係。<br>
+      難度＝官方公布之各題答對率（單選、選填）／得分率（多選），數值愈高愈簡單。
+      <nav class="flinks" aria-label="頁尾導覽">
+        <a href="index.html" aria-current="page">題庫練習</a>
+        <a href="check">查題校對</a>
+        <a href="about.html">資料來源與說明</a>
+      </nav>
+    </footer>
   </main>
 
-  <footer class="footer"><div class="shell">題目、答案與統計資料均溯源至大考中心正式資料；本站與大考中心無隸屬關係。</div></footer>
   <script src="data/bank.js"></script>
   <script src="assets/app.js"></script>
 </body>

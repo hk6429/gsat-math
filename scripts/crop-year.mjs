@@ -6,6 +6,14 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("../", import.meta.url));
 const year = Number(process.argv[2]);
 const layouts = {
+  112: {
+    A: { gapBeforeNext: { 6: 135, 12: 145 } },
+    B: { gapBeforeNext: { 12: 145 } }
+  },
+  113: {
+    A: { gapBeforeNext: { 6: 135, 12: 145, 17: 500 } },
+    B: { gapBeforeNext: { 17: 650 } }
+  },
   114: {
     A: { gapBeforeNext: { 6: 135, 12: 145, 17: 500 } },
     B: { gapBeforeNext: { 12: 145, 17: 500 } }
@@ -36,7 +44,7 @@ function startsForPage(pdf, page) {
     "-"
   ], { encoding: "utf8" });
   const starts = [];
-  const word = /<word xMin="([\d.]+)" yMin="([\d.]+)"[^>]*>(\d+)\.<\/word>/g;
+  const word = /<word xMin="([\d.]+)" yMin="([\d.]+)"[^>]*>(\d+)\.[^<]*<\/word>/g;
   for (const match of html.matchAll(word)) {
     const x = Number(match[1]);
     const y = Number(match[2]);
