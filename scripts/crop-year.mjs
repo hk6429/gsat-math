@@ -6,6 +6,18 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("../", import.meta.url));
 const year = Number(process.argv[2]);
 const layouts = {
+  85: {
+    M: {
+      sourceFile: "math-questions.pdf",
+      firstPage: 2,
+      lastPage: 6,
+      questionXMin: 85,
+      questionXMax: 108,
+      gapBeforeNext: { 14: 210, 17: -160 },
+      overlapMasks: { 17: "rectangle 0,115 527,207" },
+      hasGroupImage: false
+    }
+  },
   86: {
     M: {
       sourceFile: "math-questions.pdf",
@@ -378,6 +390,14 @@ for (const subject of Object.keys(layouts[year])) {
       "-crop", `${cropWidth}x${height}+${cropX}+${top}`,
       "+repage", "-trim", "+repage", "-quality", "88", output
     ]);
+    if (config.overlapMasks?.[current.no]) {
+      execFileSync("magick", [
+        output,
+        "-fill", "white",
+        "-draw", config.overlapMasks[current.no],
+        "-trim", "+repage", "-quality", "88", output
+      ]);
+    }
   }
 
   if (config.hasGroupImage !== false) {
