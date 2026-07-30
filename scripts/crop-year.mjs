@@ -6,6 +6,15 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("../", import.meta.url));
 const year = Number(process.argv[2]);
 const layouts = {
+  110: {
+    M: {
+      sourceFile: "math-questions.pdf",
+      firstPage: 2,
+      lastPage: 7,
+      gapBeforeNext: { 6: 250, 13: 145 },
+      hasGroupImage: false
+    }
+  },
   111: {
     A: { gapBeforeNext: { 6: 135, 12: 145 } },
     B: { gapBeforeNext: { 12: 145 } }
@@ -39,7 +48,7 @@ const scale = renderedWidth / pageWidth;
 const cropX = 108;
 const cropWidth = 972;
 
-function startsForPage(pdf, page) {
+function startsForPage(pdf, page, legacy = false) {
   const html = execFileSync("pdftotext", [
     "-f", String(page),
     "-l", String(page),
@@ -47,34 +56,46 @@ function startsForPage(pdf, page) {
     pdf,
     "-"
   ], { encoding: "utf8" });
-  const starts = [];
-  const word = /<word xMin="([\d.]+)" yMin="([\d.]+)"[^>]*>(\d+)\.[^<]*<\/word>/g;
+  const rows = new Map();
+  const word = /<word xMin="([\d.]+)" yMin="([\d.]+)"[^>]*>([^<]+)<\/word>/g;
   for (const match of html.matchAll(word)) {
     const x = Number(match[1]);
     const y = Number(match[2]);
-    const no = Number(match[3]);
-    if (x >= 58 && x <= 70 && no >= 1 && no <= 20) {
-      starts.push({ no, page, y });
-    }
+    if (x < 58 || x > 90) continue;
+    const key = [...rows.keys()].find((value) => Math.abs(value - y) < 0.6) ?? y;
+    rows.set(key, `${rows.get(key) || ""}${match[3]}`);
+  }
+  const starts = [];
+  for (const [y, text] of rows) {
+    const numeric = text.match(/^(\d{1,2})\.$/);
+    const letter = legacy ? text.match(/^([A-G])\.$/) : null;
+    const no = numeric
+      ? Number(numeric[1])
+      : letter
+        ? 14 + letter[1].charCodeAt(0) - "A".charCodeAt(0)
+        : 0;
+    if (no >= 1 && no <= 20) starts.push({ no, page, y });
   }
   return starts;
 }
 
-for (const subject of ["A", "B"]) {
+for (const subject of Object.keys(layouts[year])) {
   const config = layouts[year][subject];
-  const pdf = join(sourceDir, `math-${subject.toLowerCase()}-questions.pdf`);
+  const pdf = join(sourceDir, config.sourceFile || `math-${subject.toLowerCase()}-questions.pdf`);
   const pages = join(sourceDir, "rendered", subject.toLowerCase());
   const out = join(root, "img", `${year}${subject}`);
+  const firstPage = config.firstPage || 2;
+  const lastPage = config.lastPage || 7;
   rmSync(pages, { recursive: true, force: true });
   mkdirSync(pages, { recursive: true });
   mkdirSync(out, { recursive: true });
   execFileSync("pdftoppm", [
-    "-png", "-r", "144", "-f", "2", "-l", "7", pdf, join(pages, "page")
+    "-png", "-r", "144", "-f", String(firstPage), "-l", String(lastPage), pdf, join(pages, "page")
   ]);
 
   const starts = [];
-  for (let page = 2; page <= 7; page += 1) {
-    starts.push(...startsForPage(pdf, page));
+  for (let page = firstPage; page <= lastPage; page += 1) {
+    starts.push(...startsForPage(pdf, page, subject === "M"));
   }
   starts.sort((a, b) => a.no - b.no);
   if (starts.length !== 20 || new Set(starts.map((item) => item.no)).size !== 20) {
@@ -99,14 +120,17 @@ for (const subject of ["A", "B"]) {
     ]);
   }
 
-  const q18 = starts.find((item) => item.no === 18);
-  const groupBottom = Math.round(q18.y * scale) - 24;
-  const groupTop = groupBottom - 430;
-  execFileSync("magick", [
-    join(pages, `page-${q18.page}.png`),
-    "-crop", `${cropWidth}x${groupBottom - groupTop}+${cropX}+${groupTop}`,
-    "+repage", "-trim", "+repage", "-quality", "88",
-    join(out, "g18.webp")
-  ]);
-  console.log(`${year} 數學 ${subject}：完成 20 題裁圖與 1 張題組材料`);
+  if (config.hasGroupImage !== false) {
+    const q18 = starts.find((item) => item.no === 18);
+    const groupBottom = Math.round(q18.y * scale) - 24;
+    const groupTop = groupBottom - 430;
+    execFileSync("magick", [
+      join(pages, `page-${q18.page}.png`),
+      "-crop", `${cropWidth}x${groupBottom - groupTop}+${cropX}+${groupTop}`,
+      "+repage", "-trim", "+repage", "-quality", "88",
+      join(out, "g18.webp")
+    ]);
+  }
+  const groupSummary = config.hasGroupImage === false ? "" : "與 1 張題組材料";
+  console.log(`${year} 數學 ${subject}：完成 20 題裁圖${groupSummary}`);
 }
