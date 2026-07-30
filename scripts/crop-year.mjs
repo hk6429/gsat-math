@@ -6,11 +6,22 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("../", import.meta.url));
 const year = Number(process.argv[2]);
 const layouts = {
+  107: {
+    M: {
+      sourceFile: "math-questions.pdf",
+      firstPage: 2,
+      lastPage: 7,
+      fillStartNo: 13,
+      gapBeforeNext: { 17: 190 },
+      hasGroupImage: false
+    }
+  },
   108: {
     M: {
       sourceFile: "math-questions.pdf",
       firstPage: 2,
       lastPage: 7,
+      fillStartNo: 14,
       gapBeforeNext: { 6: 230 },
       hasGroupImage: false
     }
@@ -20,6 +31,7 @@ const layouts = {
       sourceFile: "math-questions.pdf",
       firstPage: 2,
       lastPage: 7,
+      fillStartNo: 14,
       gapBeforeNext: { 7: 230, 13: 145 },
       hasGroupImage: false
     }
@@ -29,6 +41,7 @@ const layouts = {
       sourceFile: "math-questions.pdf",
       firstPage: 2,
       lastPage: 7,
+      fillStartNo: 14,
       gapBeforeNext: { 6: 250, 13: 145 },
       hasGroupImage: false
     }
@@ -66,7 +79,7 @@ const scale = renderedWidth / pageWidth;
 const cropX = 108;
 const cropWidth = 972;
 
-function startsForPage(pdf, page, legacy = false) {
+function startsForPage(pdf, page, fillStartNo) {
   const html = execFileSync("pdftotext", [
     "-f", String(page),
     "-l", String(page),
@@ -79,18 +92,18 @@ function startsForPage(pdf, page, legacy = false) {
   for (const match of html.matchAll(word)) {
     const x = Number(match[1]);
     const y = Number(match[2]);
-    if (x < 58 || x > 90) continue;
+    if (x < 58 || x > 78) continue;
     const key = [...rows.keys()].find((value) => Math.abs(value - y) < 0.6) ?? y;
     rows.set(key, `${rows.get(key) || ""}${match[3]}`);
   }
   const starts = [];
   for (const [y, text] of rows) {
     const numeric = text.match(/^(\d{1,2})\.$/);
-    const letter = legacy ? text.match(/^([A-G])\.$/) : null;
+    const letter = fillStartNo ? text.match(/^([A-Z])\.$/) : null;
     const no = numeric
       ? Number(numeric[1])
       : letter
-        ? 14 + letter[1].charCodeAt(0) - "A".charCodeAt(0)
+        ? fillStartNo + letter[1].charCodeAt(0) - "A".charCodeAt(0)
         : 0;
     if (no >= 1 && no <= 20) starts.push({ no, page, y });
   }
@@ -113,7 +126,7 @@ for (const subject of Object.keys(layouts[year])) {
 
   const starts = [];
   for (let page = firstPage; page <= lastPage; page += 1) {
-    starts.push(...startsForPage(pdf, page, subject === "M"));
+    starts.push(...startsForPage(pdf, page, config.fillStartNo));
   }
   starts.sort((a, b) => a.no - b.no);
   if (starts.length !== 20 || new Set(starts.map((item) => item.no)).size !== 20) {
