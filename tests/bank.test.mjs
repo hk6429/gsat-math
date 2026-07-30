@@ -183,7 +183,12 @@ test("逐字 LaTeX 題目資料具有題幹、選項、解析與官方頁碼", (
       }
     }
   }
-  assert.equal(Object.keys(mathContent).length, 80);
+  for (const subject of ["A", "B"]) {
+    for (let no = 1; no <= 20; no += 1) {
+      assert.ok(mathContent[`113${subject}-${no}`], `缺少 113${subject} 第 ${no} 題結構化資料`);
+    }
+  }
+  assert.equal(Object.keys(mathContent).length, 120);
 });
 
 test("正式來源 manifest 與完整回補範圍已登錄", () => {
