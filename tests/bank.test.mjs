@@ -8,9 +8,9 @@ const context = { window: {} };
 vm.runInNewContext(code, context);
 const bank = context.window.MATH_BANK;
 
-test("收錄 107～115 各正式數學考科，每卷 20 題", () => {
-  assert.equal(bank.length, 14);
-  assert.deepEqual(Array.from(bank, (exam) => `${exam.year}${exam.subject}`), ["115A", "115B", "114A", "114B", "113A", "113B", "112A", "112B", "111A", "111B", "110M", "109M", "108M", "107M"]);
+test("收錄 106～115 各正式數學考科，每卷 20 題", () => {
+  assert.equal(bank.length, 15);
+  assert.deepEqual(Array.from(bank, (exam) => `${exam.year}${exam.subject}`), ["115A", "115B", "114A", "114B", "113A", "113B", "112A", "112B", "111A", "111B", "110M", "109M", "108M", "107M", "106M"]);
   for (const exam of bank) assert.equal(exam.questions.length, 20);
 });
 
@@ -72,7 +72,8 @@ test("官方答案逐題固定", () => {
     "110M": ["2","1","3","5","4","5","2,3,4","3,5","2,3,4","1,2","1,2,5","2,5","2,3,5","37","6,4,0","1/14","-2≤a≤6","(2,56)","8+4√2","4√2"],
     "109M": ["2","1","2","5","3","4","4","1,2","4,5","1,4","3,5","1,3","2,4","300","1/9","-5","2√10/5","(-3,-1,-2)","5/56","a=1/6,b=3"],
     "108M": ["3","1","3","5","4","2","1,4","4,5","3,5","1,2","3,5","1,2,5","3,4","-4","29/4","105","215","13","2√3","-3"],
-    "107M": ["4","3","5","2","3","5","4","1,4","2,3,5","2,3","3,5","1,3,4","24","170","25/4","9/2","3/5","7/2","s=1/3,t=2/3","√337"]
+    "107M": ["4","3","5","2","3","5","4","1,4","2,3,5","2,3","3,5","1,3,4","24","170","25/4","9/2","3/5","7/2","s=1/3,t=2/3","√337"],
+    "106M": ["1","3","5","4","4","1","2","1,3","5","2,3,4","1,4","2,5","3,5","25","(40/21,25/21)","7","-5","47","9/64","14.4"]
   };
   for (const exam of bank) {
     assert.deepEqual(Array.from(exam.questions, (q) => q.answer), expected[`${exam.year}${exam.subject}`]);
@@ -94,7 +95,7 @@ test("正式來源 manifest 與完整回補範圍已登錄", () => {
   assert.equal(catalog.scope.firstYear, 83);
   assert.equal(catalog.scope.latestYear, 115);
   assert.equal(catalog.scope.expectedExamForms, 38);
-  for (const year of [107, 108, 109, 110, 111, 112, 113, 114, 115]) {
+  for (const year of [106, 107, 108, 109, 110, 111, 112, 113, 114, 115]) {
     const source = JSON.parse(readFileSync(new URL(`../sources/${year}.json`, import.meta.url), "utf8"));
     assert.equal(source.files.length, year >= 111 ? 7 : 3);
     for (const file of source.files) {
