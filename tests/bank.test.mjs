@@ -6,6 +6,8 @@ import vm from "node:vm";
 const code = readFileSync(new URL("../data/bank.js", import.meta.url), "utf8");
 const context = { window: {} };
 vm.runInNewContext(code, context);
+const optionRatesCode = readFileSync(new URL("../data/option-rates.js", import.meta.url), "utf8");
+vm.runInNewContext(optionRatesCode, context);
 const bank = context.window.MATH_BANK;
 
 test("收錄 83～115 各正式數學考科，每卷 20 題", () => {
@@ -115,6 +117,33 @@ test("分類與標籤完整", () => {
       assert.ok(q.summary);
     }
   }
+});
+
+test("111～115 學年度選擇題附官方各選項畫記率，未公開年份不反推", () => {
+  for (const exam of bank) {
+    for (const q of exam.questions) {
+      if (exam.year >= 111 && q.no <= 12 && (q.kind === "single" || q.kind === "multi")) {
+        assert.equal(q.optionRates.length, 5, `${exam.year}${exam.subject} 第 ${q.no} 題`);
+        for (const rate of q.optionRates) assert.ok(Number.isFinite(rate) && rate >= 0 && rate <= 100);
+      } else {
+        assert.equal(q.optionRates, undefined, `${exam.year}${exam.subject} 第 ${q.no} 題不應含推估選項率`);
+      }
+    }
+  }
+  assert.deepEqual(Array.from(bank.find((exam) => exam.year === 115 && exam.subject === "A").questions[0].optionRates), [1, 84, 5, 5, 5]);
+  assert.deepEqual(Array.from(bank.find((exam) => exam.year === 111 && exam.subject === "B").questions[11].optionRates), [38, 34, 69, 44, 64]);
+});
+
+test("首頁與查題頁都載入解析及官方選項統計介面", () => {
+  const homepage = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+  const app = readFileSync(new URL("../assets/app.js", import.meta.url), "utf8");
+  const check = readFileSync(new URL("../check.html", import.meta.url), "utf8");
+  assert.match(homepage, /id="categoryGroups"/);
+  assert.match(homepage, /data\/option-rates\.js/);
+  assert.match(app, /全體考生各選項畫記率/);
+  assert.match(app, /class="explainBox"/);
+  assert.match(check, /data\/option-rates\.js/);
+  assert.match(check, /全體考生各選項畫記率/);
 });
 
 test("正式來源 manifest 與完整回補範圍已登錄", () => {
