@@ -427,7 +427,14 @@
         String.raw`平行四邊形 \(ABCD\) 的面積等於 \(\left|\overrightarrow{AB}\times\overrightarrow{AD}\right|\)。`,
         String.raw`因此面積為
         \[\sqrt{(-5)^2+5^2+5^2}=\sqrt{75}=5\sqrt3。\]`
-      ]
+      ],
+      optionAnalysis: {
+        "1": String.raw`未將三個外積分量的平方完整相加。`,
+        "2": String.raw`外積長度平方不是 \(25+25\)，還有第三個 \(25\)。`,
+        "3": String.raw`\(\sqrt{(-5)^2+5^2+5^2}=\sqrt{75}=5\sqrt3\)。`,
+        "4": String.raw`將 \(\sqrt{75}\) 化簡錯誤。`,
+        "5": String.raw`此值的平方為 200，與外積平方長 75 不符。`
+      }
     },
     "115A-19": {
       verified: true,

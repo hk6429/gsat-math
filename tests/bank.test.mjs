@@ -183,7 +183,7 @@ test("逐字 LaTeX 題目資料具有題幹、選項、解析與官方頁碼", (
     assert.ok(question, `找不到題目 ${key}`);
     if (question.kind === "single" || question.kind === "multi") {
       assert.deepEqual(Object.keys(content.options), Array.from({ length: question.optionCount }, (_, index) => String(index + 1)));
-      if (question.optionRates) assert.deepEqual(Object.keys(content.optionAnalysis), Object.keys(content.options));
+      assert.deepEqual(Object.keys(content.optionAnalysis), Object.keys(content.options));
     }
   }
   assert.match(mathContent["115A-1"].stem, /\\frac\{1\}\{3\}/);
