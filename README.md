@@ -70,7 +70,7 @@ npm test
 npm run crop:115
 ```
 
-87～114 學年度分別使用 `npm run crop:87`、`npm run crop:88`、`npm run crop:89`、`npm run crop:90`、`npm run crop:91`、`npm run crop:92`、`npm run crop:93`、`npm run crop:94`、`npm run crop:95`、`npm run crop:96`、`npm run crop:97`、`npm run crop:98`、`npm run crop:99`、`npm run crop:100`、`npm run crop:101`、`npm run crop:102`、`npm run crop:103`、`npm run crop:104`、`npm run crop:105`、`npm run crop:106`、`npm run crop:107`、`npm run crop:108`、`npm run crop:109`、`npm run crop:110`、`npm run crop:111`、`npm run crop:112`、`npm run crop:113`、`npm run crop:114`。每年資料來源檔放在 `data/years/qXXX.js`，執行 `npm run build:bank` 會重新產生網站使用的 `data/bank.js`。
+83～115 學年度皆可使用 `npm run crop:<year>` 重新產生該年度題圖，例如 `npm run crop:83` 或 `npm run crop:115`。每年資料來源檔放在 `data/years/qXXX.js`，執行 `npm run build:bank` 會重新產生網站使用的 `data/bank.js`。
 
 原始 PDF 預期放在 `.sources/{year}/`，該目錄不納入版本控制；正式來源與 SHA-256 記錄於 `sources/{year}.json`。
 
