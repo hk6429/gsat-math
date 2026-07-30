@@ -9,7 +9,7 @@
       return window.katex.renderToString(tex, {
         displayMode,
         throwOnError: true,
-        strict: "warn",
+        strict: false,
         trust: false,
         output: "htmlAndMathml"
       });
