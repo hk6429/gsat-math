@@ -176,19 +176,14 @@ test("逐字 LaTeX 題目資料具有題幹、選項、解析與官方頁碼", (
   }
   assert.match(mathContent["115A-1"].stem, /\\frac\{1\}\{3\}/);
   assert.equal(mathContent["115A-1"].options["2"], "30 元");
-  for (const year of [114, 115]) {
+  for (const year of [112, 113, 114, 115]) {
     for (const subject of ["A", "B"]) {
       for (let no = 1; no <= 20; no += 1) {
         assert.ok(mathContent[`${year}${subject}-${no}`], `缺少 ${year}${subject} 第 ${no} 題結構化資料`);
       }
     }
   }
-  for (const subject of ["A", "B"]) {
-    for (let no = 1; no <= 20; no += 1) {
-      assert.ok(mathContent[`113${subject}-${no}`], `缺少 113${subject} 第 ${no} 題結構化資料`);
-    }
-  }
-  assert.equal(Object.keys(mathContent).length, 120);
+  assert.equal(Object.keys(mathContent).length, 160);
 });
 
 test("正式來源 manifest 與完整回補範圍已登錄", () => {
