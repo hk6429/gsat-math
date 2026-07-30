@@ -161,6 +161,7 @@ test("首頁與查題頁都載入解析及官方選項統計介面", () => {
   assert.match(app, /MathQuestionUI\.optionAnalysisHtml/);
   assert.match(app, /class="explainBox"/);
   assert.match(renderer, /各選項作答分析/);
+  assert.match(renderer, /逐選項解題分析/);
   assert.match(check, /data\/option-rates\.js/);
   assert.match(check, /data\/content\.js/);
   assert.match(check, /assets\/math-renderer\.js/);
@@ -194,12 +195,12 @@ test("逐字 LaTeX 題目資料具有題幹、選項、解析與官方頁碼", (
       }
     }
   }
-  for (const year of [95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110]) {
+  for (const year of [94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110]) {
     for (let no = 1; no <= 20; no += 1) {
       assert.ok(mathContent[`${year}M-${no}`], `缺少 ${year}M 第 ${no} 題結構化資料`);
     }
   }
-  assert.equal(Object.keys(mathContent).length, 520);
+  assert.equal(Object.keys(mathContent).length, 540);
 });
 
 test("正式來源 manifest 與完整回補範圍已登錄", () => {

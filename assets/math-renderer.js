@@ -57,8 +57,8 @@
 
   function optionAnalysisHtml(q) {
     const content = contentFor(q);
+    const correct = new Set(String(q.answer).split(",").map((value) => value.trim()));
     if (q.optionRates?.length) {
-      const correct = new Set(String(q.answer).split(",").map((value) => value.trim()));
       const rows = q.optionRates.map((rate, index) => {
         const key = String(index + 1);
         const analysis = content?.optionAnalysis?.[key];
@@ -70,11 +70,15 @@
       }).join("");
       return `<div class="optionStats"><b>各選項作答分析（大考中心官方畫記率）</b>${rows}<small>${q.kind === "multi" ? "多選題各選項分別計算畫記率，合計可能超過 100%。" : "因四捨五入，各選項合計可能不等於 100%。"}</small></div>`;
     }
+    const analysisRows = Object.keys(content?.optionAnalysis || {}).map((key) => `<div class="option-analysis-row ${correct.has(key) ? "is-correct" : ""}">
+      <div class="option-analysis-head"><span class="option-analysis-key">(${key})${correct.has(key) ? "／正解" : ""}</span><div class="option-analysis-text">${optionHtml(q, key)}</div></div>
+      <p>${richText(content.optionAnalysis[key])}</p>
+    </div>`).join("");
     if (q.pass != null) {
       const value = Math.round(q.pass * 100);
-      return `<div class="optionStats"><b>大考中心官方統計</b><div class="rate-row"><span>${q.kind === "multi" ? "得分率" : "答對率"}</span><i><b class="rate-ok" style="width:${value}%"></b></i><em>${value}%</em></div><small>本年度官方公開資料未提供各錯誤選項畫記率，本站不以答對率反推。</small></div>`;
+      return `<div class="optionStats"><b>大考中心官方統計</b><div class="rate-row"><span>${q.kind === "multi" ? "得分率" : "答對率"}</span><i><b class="rate-ok" style="width:${value}%"></b></i><em>${value}%</em></div><small>本年度官方公開資料未提供各錯誤選項畫記率，本站不以答對率反推。</small>${analysisRows ? `<b>逐選項解題分析</b>${analysisRows}` : ""}</div>`;
     }
-    return `<div class="optionStats"><b>答題統計</b><small>本年度大考中心公開頁未提供逐題答對率或各選項畫記率，本站不自行推算。</small></div>`;
+    return `<div class="optionStats"><b>答題統計</b><small>本年度大考中心公開頁未提供逐題答對率或各選項畫記率，本站不自行推算。</small>${analysisRows ? `<b>逐選項解題分析</b>${analysisRows}` : ""}</div>`;
   }
 
   window.MathQuestionUI = { contentFor, keyFor, optionAnalysisHtml, optionHtml, questionBodyHtml, richText, solutionHtml };
