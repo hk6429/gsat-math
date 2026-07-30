@@ -1,0 +1,24 @@
+{
+  "year": 100,
+  "publisher": "財團法人大學入學考試中心基金會",
+  "officialPage": "https://www.ceec.edu.tw/xmfile?page=10&xsmsid=0J052424829869345634",
+  "statisticsPage": "https://www.ceec.edu.tw/xmdoc/cont?sid=0J053572697488055004&xsmsid=0J018604485538810196",
+  "files": [
+    {
+      "id": "math-questions",
+      "url": "https://www.ceec.edu.tw/files/file_pool/1/0j076553725093448538/03-100%e5%ad%b8%e6%b8%ac%e6%95%b8%e5%ad%b8%e8%a9%a6%e5%8d%b7%e5%ae%9a%e7%a8%bf.pdf",
+      "sha256": "f31421ab5ef4669e38cf3209946c36f768f89bd4e38b60d886cf332ad14e3b3a"
+    },
+    {
+      "id": "math-answers",
+      "url": "https://www.ceec.edu.tw/files/file_pool/1/0j076553736637327565/100%e5%ad%b8%e6%b8%ac%e6%95%b8%e5%ad%b8%e5%8f%83%e8%80%83%e7%ad%94%e6%a1%88%e5%ae%9a%e7%a8%bf.pdf",
+      "sha256": "f0ad319d28c71cb9b1d70ecc93c607f48454c2a0b0c271fea91a1143a2298ab4"
+    },
+    {
+      "id": "math-stats",
+      "localFile": "math-stats.xls",
+      "url": "https://www.ceec.edu.tw/files/file_pool/1/0J053576579544064589/100SAT_stat_4246.xls",
+      "sha256": "96d24241b71e9b02135593c5239db0cdce33bf537f056ffb9b099be5450b6146"
+    }
+  ]
+}
