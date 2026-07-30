@@ -8,7 +8,10 @@ const context = { window: {} };
 vm.runInNewContext(code, context);
 const optionRatesCode = readFileSync(new URL("../data/option-rates.js", import.meta.url), "utf8");
 vm.runInNewContext(optionRatesCode, context);
+const contentCode = readFileSync(new URL("../data/content.js", import.meta.url), "utf8");
+vm.runInNewContext(contentCode, context);
 const bank = context.window.MATH_BANK;
+const mathContent = context.window.MATH_CONTENT;
 
 test("收錄 83～115 各正式數學考科，每卷 20 題", () => {
   assert.equal(bank.length, 38);
@@ -137,13 +140,42 @@ test("111～115 學年度選擇題附官方各選項畫記率，未公開年份�
 test("首頁與查題頁都載入解析及官方選項統計介面", () => {
   const homepage = readFileSync(new URL("../index.html", import.meta.url), "utf8");
   const app = readFileSync(new URL("../assets/app.js", import.meta.url), "utf8");
+  const renderer = readFileSync(new URL("../assets/math-renderer.js", import.meta.url), "utf8");
   const check = readFileSync(new URL("../check.html", import.meta.url), "utf8");
   assert.match(homepage, /id="categoryGroups"/);
   assert.match(homepage, /data\/option-rates\.js/);
-  assert.match(app, /全體考生各選項畫記率/);
+  assert.match(homepage, /data\/content\.js/);
+  assert.match(homepage, /assets\/math-renderer\.js/);
+  assert.match(homepage, /assets\/vendor\/katex\/katex\.min\.js/);
+  assert.match(app, /MathQuestionUI\.optionAnalysisHtml/);
   assert.match(app, /class="explainBox"/);
+  assert.match(renderer, /各選項作答分析/);
   assert.match(check, /data\/option-rates\.js/);
-  assert.match(check, /全體考生各選項畫記率/);
+  assert.match(check, /data\/content\.js/);
+  assert.match(check, /assets\/math-renderer\.js/);
+  assert.match(check, /MathQuestionUI\.optionAnalysisHtml/);
+});
+
+test("逐字 LaTeX 題目資料具有題幹、選項、解析與官方頁碼", () => {
+  assert.ok(Object.keys(mathContent).length >= 1);
+  for (const [key, content] of Object.entries(mathContent)) {
+    assert.match(key, /^\d{3}[ABM]-\d{1,2}$/);
+    assert.equal(content.verified, true);
+    assert.equal(typeof content.stem, "string");
+    assert.ok(content.stem.length >= 20);
+    assert.ok(Number.isInteger(content.sourcePage) && content.sourcePage >= 1);
+    assert.ok(Array.isArray(content.solution) && content.solution.length >= 1);
+    const [form, no] = key.split("-");
+    const exam = bank.find((item) => `${item.year}${item.subject}` === form);
+    const question = exam?.questions.find((item) => item.no === Number(no));
+    assert.ok(question, `找不到題目 ${key}`);
+    if (question.kind === "single" || question.kind === "multi") {
+      assert.deepEqual(Object.keys(content.options), Array.from({ length: question.optionCount }, (_, index) => String(index + 1)));
+      if (question.optionRates) assert.deepEqual(Object.keys(content.optionAnalysis), Object.keys(content.options));
+    }
+  }
+  assert.match(mathContent["115A-1"].stem, /\\frac\{1\}\{3\}/);
+  assert.equal(mathContent["115A-1"].options["2"], "30 元");
 });
 
 test("正式來源 manifest 與完整回補範圍已登錄", () => {

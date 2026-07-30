@@ -121,24 +121,12 @@
   }
 
   function explanationHtml(q) {
-    return `<div class="explainBox"><b>解析</b><p>本題考查「${escapeHtml(q.tags.join("、"))}」：${escapeHtml(q.summary)}。${strategyFor(q)}</p><p>依大考中心官方參考答案，本題答案為 <b>${escapeHtml(q.answer)}</b>。題面中的式子、圖形與數值請以官方原卷裁圖為準。</p></div>`;
+    const fallback = `<div class="explainBox"><b>解析</b><p>本題考查「${escapeHtml(q.tags.join("、"))}」：${escapeHtml(q.summary)}。${strategyFor(q)}</p><p>依大考中心官方參考答案，本題答案為 <b>${escapeHtml(q.answer)}</b>。題面中的式子、圖形與數值請以官方原卷裁圖為準。</p></div>`;
+    return window.MathQuestionUI.solutionHtml(q, fallback);
   }
 
   function optionAnalysisHtml(q) {
-    if (q.optionRates?.length) {
-      const correct = new Set(correctKeys(q));
-      const rows = q.optionRates.map((rate, index) => {
-        const key = String(index + 1);
-        const mark = correct.has(key) ? "／正解" : "";
-        return `<div class="rate-row"><span>(${key})${mark}</span><i><b class="${correct.has(key) ? "rate-ok" : ""}" style="width:${Math.min(100, rate)}%"></b></i><em>${rate}%</em></div>`;
-      }).join("");
-      return `<div class="optionStats"><b>全體考生各選項畫記率（大考中心官方統計）</b>${rows}<small>${q.kind === "multi" ? "多選題每個選項分別計算畫記率，合計可能超過 100%。" : "因四捨五入，各選項合計可能不等於 100%。"}</small></div>`;
-    }
-    if (q.pass != null) {
-      const value = Math.round(q.pass * 100);
-      return `<div class="optionStats"><b>大考中心官方統計</b><div class="rate-row"><span>${q.kind === "multi" ? "得分率" : "答對率"}</span><i><b class="rate-ok" style="width:${value}%"></b></i><em>${value}%</em></div><small>本年度官方公開資料未提供各錯誤選項畫記率，本站不以答對率反推。</small></div>`;
-    }
-    return `<div class="optionStats"><b>答題統計</b><small>本年度大考中心公開頁未提供逐題答對率或各選項畫記率，本站不自行推算。</small></div>`;
+    return window.MathQuestionUI.optionAnalysisHtml(q);
   }
 
   function updateScorebar() {
@@ -179,10 +167,11 @@
     }
     state.selected.clear();
     const stats = q.pass == null ? "" : `<div class="meta-grid"><div class="meta-box"><b>${Math.round(q.pass * 100)}%</b><span>${q.kind === "multi" ? "官方得分率 P" : "官方答對率 P"}</span></div><div class="meta-box"><b>${Math.round(q.disc * 100)}</b><span>官方鑑別度 D</span></div><div class="meta-box"><b>${difficulty(q)}</b><span>依 P 值分級</span></div></div>`;
-    const group = q.groupImage ? `<img class="group-image" src="${q.groupImage}" alt="共用題組材料">` : "";
+    const structured = window.MathQuestionUI.contentFor(q)?.verified;
+    const group = q.groupImage && !structured ? `<img class="group-image" src="${q.groupImage}" alt="共用題組材料">` : "";
     $("questionArea").innerHTML = `<article class="panel question-card">
       <div class="question-head"><div><p class="eyebrow">${q.exam.year} 學年度・${q.exam.label}</p><h2 class="question-title">第 ${q.no} 題｜${escapeHtml(q.summary)}</h2><div class="chips"><span class="chip">${escapeHtml(q.cat)}</span><span class="chip">${escapeHtml(q.tags[0])}</span><span class="chip accent">${kindLabel(q.kind)}</span></div></div><div class="counter">${state.index + 1} / ${state.pool.length}</div></div>
-      ${group}<img class="question-image" src="${q.image}" alt="${q.exam.year} 學年度${q.exam.label}第 ${q.no} 題官方題面">
+      ${group}${window.MathQuestionUI.questionBodyHtml(q)}
       <div class="answer-zone">${answerControl(q)}</div><div id="feedback" class="feedback" role="status" aria-live="polite"></div><div id="postAnswer"></div>${stats}
       <div class="btn-row"><button class="btn ghost" id="prevBtn" type="button">上一題</button><button class="btn secondary" id="nextBtn" type="button">下一題</button><a class="btn ghost" href="check?year=${q.exam.year}&subject=${q.exam.subject}&no=${q.no}">查題校對</a></div>
     </article>`;
@@ -192,7 +181,7 @@
 
   function answerControl(q) {
     if (q.kind === "single" || q.kind === "multi") {
-      return `<p>${q.kind === "multi" ? "可複選，選好後送出。" : "請選一個答案。"}</p><div class="choice-list">${Array.from({ length: q.optionCount }, (_, i) => `<button class="choice" type="button" data-choice="${i + 1}" aria-pressed="false"><span>${i + 1}</span>選項（${i + 1}）</button>`).join("")}</div><div class="btn-row"><button class="btn" id="submitBtn" type="button">送出答案</button></div>`;
+      return `<p>${q.kind === "multi" ? "可複選，選好後送出。" : "請選一個答案。"}</p><div class="choice-list">${Array.from({ length: q.optionCount }, (_, i) => `<button class="choice" type="button" data-choice="${i + 1}" aria-pressed="false"><span>${i + 1}</span><span class="choice-content">${window.MathQuestionUI.optionHtml(q, String(i + 1))}</span></button>`).join("")}</div><div class="btn-row"><button class="btn" id="submitBtn" type="button">送出答案</button></div>`;
     }
     if (q.kind === "fill") return `<label for="fillAnswer"><b>輸入答案</b>（分數可用 /，根號可用 √）</label><input id="fillAnswer" type="text" autocomplete="off"><div class="btn-row"><button class="btn" id="submitBtn" type="button">送出答案</button></div>`;
     return `<p>非選擇題依推理過程評分，請完成後對照官方評分原則。</p><a class="btn" href="${q.rubricUrl}" target="_blank" rel="noopener">查看官方評分原則</a><div class="btn-row"><button class="btn" id="selfCheckBtn" type="button">已自行核對</button></div>`;

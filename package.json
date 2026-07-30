@@ -4,8 +4,9 @@
   "private": true,
   "description": "大學學測數學考古題互動練習網站",
   "scripts": {
-    "build": "npm run build:bank && node scripts/build.mjs",
+    "build": "npm run build:bank && npm run build:content && node scripts/build.mjs",
     "build:bank": "node scripts/build-bank.mjs",
+    "build:content": "node scripts/build-content.mjs",
     "crop:83": "node scripts/crop-year.mjs 83",
     "crop:84": "node scripts/crop-year.mjs 84",
     "crop:85": "node scripts/crop-year.mjs 85",
@@ -39,11 +40,14 @@
     "crop:113": "node scripts/crop-year.mjs 113",
     "crop:114": "node scripts/crop-year.mjs 114",
     "crop:115": "node scripts/crop-year.mjs 115",
-    "test": "npm run build:bank && node --test",
+    "test": "npm run build:bank && npm run build:content && node --test",
     "verify:sources": "node scripts/verify-sources.mjs",
-    "serve": "npx serve ."
+    "serve": "npm run build && npx serve dist"
   },
   "engines": {
     "node": "24.x"
+  },
+  "dependencies": {
+    "katex": "^0.18.1"
   }
 }
