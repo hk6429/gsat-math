@@ -195,12 +195,12 @@ test("逐字 LaTeX 題目資料具有題幹、選項、解析與官方頁碼", (
       }
     }
   }
-  for (const year of [86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110]) {
+  for (const year of [85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110]) {
     for (let no = 1; no <= 20; no += 1) {
       assert.ok(mathContent[`${year}M-${no}`], `缺少 ${year}M 第 ${no} 題結構化資料`);
     }
   }
-  assert.equal(Object.keys(mathContent).length, 700);
+  assert.equal(Object.keys(mathContent).length, 720);
 });
 
 test("正式來源 manifest 與完整回補範圍已登錄", () => {
