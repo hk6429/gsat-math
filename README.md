@@ -4,6 +4,7 @@
 
 ## 目前收錄
 
+- 103 學年度數學：20 題
 - 104 學年度數學：20 題
 - 105 學年度數學：20 題
 - 106 學年度數學：20 題
@@ -25,7 +26,7 @@
 - 所有客觀題均收錄官方答對率／得分率（P）與鑑別度（D）
 - 111 學年度起第 19、20 題為非選擇題，連結大考中心正式評分原則
 
-目前共收錄 340 題。題面採官方原卷精準裁圖，優先確保根號、矩陣、圖表、上下標與選填格式完全忠於原卷；後續版本再補可搜尋的結構化數學文字。
+目前共收錄 360 題。題面採官方原卷精準裁圖，優先確保根號、矩陣、圖表、上下標與選填格式完全忠於原卷；後續版本再補可搜尋的結構化數學文字。
 
 ## 主要功能
 
@@ -54,7 +55,7 @@ npm test
 npm run crop:115
 ```
 
-104～114 學年度分別使用 `npm run crop:104`、`npm run crop:105`、`npm run crop:106`、`npm run crop:107`、`npm run crop:108`、`npm run crop:109`、`npm run crop:110`、`npm run crop:111`、`npm run crop:112`、`npm run crop:113`、`npm run crop:114`。每年資料來源檔放在 `data/years/qXXX.js`，執行 `npm run build:bank` 會重新產生網站使用的 `data/bank.js`。
+103～114 學年度分別使用 `npm run crop:103`、`npm run crop:104`、`npm run crop:105`、`npm run crop:106`、`npm run crop:107`、`npm run crop:108`、`npm run crop:109`、`npm run crop:110`、`npm run crop:111`、`npm run crop:112`、`npm run crop:113`、`npm run crop:114`。每年資料來源檔放在 `data/years/qXXX.js`，執行 `npm run build:bank` 會重新產生網站使用的 `data/bank.js`。
 
 原始 PDF 預期放在 `.sources/{year}/`，該目錄不納入版本控制；正式來源與 SHA-256 記錄於 `sources/{year}.json`。
 
