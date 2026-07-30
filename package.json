@@ -6,6 +6,7 @@
   "scripts": {
     "build": "npm run build:bank && node scripts/build.mjs",
     "build:bank": "node scripts/build-bank.mjs",
+    "crop:105": "node scripts/crop-year.mjs 105",
     "crop:106": "node scripts/crop-year.mjs 106",
     "crop:107": "node scripts/crop-year.mjs 107",
     "crop:108": "node scripts/crop-year.mjs 108",
