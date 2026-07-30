@@ -26,17 +26,18 @@
       <h1>公式不失真，答案有憑據。</h1>
       <p class="lede">把大考中心正式數學 A、數學 B 原卷變成可練習、可篩選、可核對的免費題庫。先忠實呈現，再談聰明功能。</p>
       <div class="stat-strip" aria-label="題庫統計">
-        <div class="stat"><b>40</b><span>115 學年度題目</span></div>
-        <div class="stat"><b>36 / 36</b><span>選填題官方答案已比對</span></div>
-        <div class="stat"><b>36 / 36</b><span>官方 P、D 統計覆蓋</span></div>
-        <div class="stat"><b>2</b><span>數學 A、數學 B</span></div>
+        <div class="stat"><b id="questionCount">—</b><span>已收錄題目</span></div>
+        <div class="stat"><b id="answerCount">—</b><span>選填題官方答案已比對</span></div>
+        <div class="stat"><b id="statsCount">—</b><span>官方 P、D 統計覆蓋</span></div>
+        <div class="stat"><b id="formCount">—</b><span>年份與試卷</span></div>
       </div>
     </section>
 
     <section class="workspace shell">
       <aside class="panel filters">
         <h2>篩選題目</h2>
-        <div class="field"><label for="subjectSel">考科</label><select id="subjectSel"><option value="all">數學 A＋B</option><option value="A">數學 A</option><option value="B">數學 B</option></select></div>
+        <div class="field"><label for="yearSel">年份</label><select id="yearSel"></select></div>
+        <div class="field"><label for="subjectSel">考科</label><select id="subjectSel"></select></div>
         <div class="field"><label for="catSel">單元</label><select id="catSel"></select></div>
         <div class="field"><label for="kindSel">題型</label><select id="kindSel"><option value="all">全部題型</option><option value="single">單選題</option><option value="multi">多選題</option><option value="fill">選填題</option><option value="written">非選擇題</option></select></div>
         <div class="field"><label for="diffSel">難度</label><select id="diffSel"><option value="all">全部難度</option><option>較易</option><option>中等</option><option>較難</option></select></div>

@@ -17,9 +17,10 @@
   <main class="content-page">
     <p class="eyebrow">QUESTION CHECK</p>
     <h1>查題校對</h1>
-    <p>輸入考科與題號，直接檢查官方題面、答案與統計資料。</p>
+    <p>選擇年份、考科與題號，直接檢查官方題面、答案與統計資料。</p>
     <form class="lookup" id="lookupForm">
-      <select id="lookupSubject" aria-label="考科"><option value="A">數學 A</option><option value="B">數學 B</option></select>
+      <select id="lookupYear" aria-label="年份"></select>
+      <select id="lookupSubject" aria-label="考科"></select>
       <input id="lookupNo" type="number" min="1" max="20" value="1" aria-label="題號">
       <button class="btn" type="submit">查詢</button>
     </form>
@@ -29,18 +30,28 @@
   <script>
     (() => {
       const params = new URLSearchParams(location.search);
+      const year = document.getElementById("lookupYear");
       const subject = document.getElementById("lookupSubject");
       const no = document.getElementById("lookupNo");
-      subject.value = params.get("subject") || "A";
+      const years = [...new Set(window.MATH_BANK.map((exam) => exam.year))].sort((a, b) => b - a);
+      year.innerHTML = years.map((value) => `<option value="${value}">${value} 學年度</option>`).join("");
+      year.value = params.get("year") || String(years[0]);
       no.value = params.get("no") || "1";
+      function populateSubjects(preferred) {
+        const forms = window.MATH_BANK.filter((exam) => exam.year === Number(year.value));
+        subject.innerHTML = forms.map((exam) => `<option value="${exam.subject}">${exam.label}</option>`).join("");
+        if (forms.some((exam) => exam.subject === preferred)) subject.value = preferred;
+      }
+      populateSubjects(params.get("subject") || "A");
       function render() {
-        const exam = window.MATH_BANK.find((item) => item.subject === subject.value);
+        const exam = window.MATH_BANK.find((item) => item.year === Number(year.value) && item.subject === subject.value);
         const q = exam?.questions.find((item) => item.no === Number(no.value));
         const target = document.getElementById("lookupResult");
         if (!q) { target.innerHTML = '<div class="panel empty">找不到這一題。</div>'; return; }
         const group = q.groupImage ? `<img class="group-image" src="${q.groupImage}" alt="第 18 至 20 題共用題組材料">` : "";
-        target.innerHTML = `<article class="panel question-card"><p class="eyebrow">115 學年度・數學 ${exam.subject}</p><h2>第 ${q.no} 題｜${q.summary}</h2><div class="chips"><span class="chip">${q.cat}</span><span class="chip">${q.tags[0]}</span></div>${group}<img class="question-image" src="${q.image}" alt="官方題面"><div class="notice" style="margin-top:20px"><b>官方答案：${q.answer}</b>${q.pass == null ? "" : `<br>${q.kind === "multi" ? "得分率" : "答對率"} P：${Math.round(q.pass*100)}%；鑑別度 D：${Math.round(q.disc*100)}`}${q.rubricUrl ? `<br><a href="${q.rubricUrl}" target="_blank" rel="noopener">查看官方評分原則</a>` : ""}</div></article>`;
+        target.innerHTML = `<article class="panel question-card"><p class="eyebrow">${exam.year} 學年度・${exam.label}</p><h2>第 ${q.no} 題｜${q.summary}</h2><div class="chips"><span class="chip">${q.cat}</span><span class="chip">${q.tags[0]}</span></div>${group}<img class="question-image" src="${q.image}" alt="官方題面"><div class="notice" style="margin-top:20px"><b>官方答案：${q.answer}</b>${q.pass == null ? "" : `<br>${q.kind === "multi" ? "得分率" : "答對率"} P：${Math.round(q.pass*100)}%；鑑別度 D：${Math.round(q.disc*100)}`}${q.rubricUrl ? `<br><a href="${q.rubricUrl}" target="_blank" rel="noopener">查看官方評分原則</a>` : ""}</div></article>`;
       }
+      year.addEventListener("change", () => { populateSubjects(); render(); });
       document.getElementById("lookupForm").addEventListener("submit", (event) => { event.preventDefault(); render(); });
       render();
     })();

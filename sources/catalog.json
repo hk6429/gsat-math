@@ -1,0 +1,19 @@
+{
+  "scope": {
+    "firstYear": 83,
+    "latestYear": 115,
+    "newCurriculumYears": [111, 112, 113, 114, 115],
+    "legacyYears": [83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110],
+    "expectedExamForms": 38
+  },
+  "status": {
+    "115": "complete",
+    "114": "complete",
+    "113": "pending",
+    "112": "pending",
+    "111": "pending",
+    "83-110": "pending"
+  },
+  "officialQuestionArchive": "https://www.ceec.edu.tw/xmfile?xsmsid=0J052424829869345634",
+  "officialWorkReports": "https://www.ceec.edu.tw/xmdoc?xsmsid=0J018604611989052655"
+}

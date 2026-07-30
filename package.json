@@ -4,9 +4,12 @@
   "private": true,
   "description": "大學學測數學考古題互動練習網站",
   "scripts": {
-    "build": "node scripts/build.mjs",
-    "crop:115": "node scripts/crop-115.mjs",
-    "test": "node --test",
+    "build": "npm run build:bank && node scripts/build.mjs",
+    "build:bank": "node scripts/build-bank.mjs",
+    "crop:114": "node scripts/crop-year.mjs 114",
+    "crop:115": "node scripts/crop-year.mjs 115",
+    "test": "npm run build:bank && node --test",
+    "verify:sources": "node scripts/verify-sources.mjs",
     "serve": "npx serve ."
   },
   "engines": {

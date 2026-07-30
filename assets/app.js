@@ -26,15 +26,32 @@
 
   function populateFilters() {
     const cats = [...new Set(allQuestions.map((q) => q.cat))].sort();
+    const years = [...new Set(exams.map((exam) => exam.year))].sort((a, b) => b - a);
+    const subjects = [...new Map(exams.map((exam) => [exam.subject, exam.label])).entries()];
+    $("yearSel").innerHTML = '<option value="all">全部年份</option>' + years.map((year) => `<option value="${year}">${year} 學年度</option>`).join("");
+    $("subjectSel").innerHTML = '<option value="all">全部考科</option>' + subjects.map(([value, label]) => `<option value="${value}">${label}</option>`).join("");
     $("catSel").innerHTML = '<option value="all">全部單元</option>' + cats.map((cat) => `<option>${cat}</option>`).join("");
   }
 
+  function updateStats() {
+    const questions = allQuestions.length;
+    const objective = allQuestions.filter((q) => q.kind !== "written").length;
+    const stats = allQuestions.filter((q) => q.pass != null && q.disc != null).length;
+    const years = new Set(exams.map((exam) => exam.year)).size;
+    $("questionCount").textContent = questions;
+    $("answerCount").textContent = `${objective} / ${objective}`;
+    $("statsCount").textContent = `${stats} / ${objective}`;
+    $("formCount").textContent = `${years} 年／${exams.length} 份`;
+  }
+
   function filtered() {
+    const year = $("yearSel").value;
     const subject = $("subjectSel").value;
     const cat = $("catSel").value;
     const kind = $("kindSel").value;
     const diff = $("diffSel").value;
     return allQuestions.filter((q) => {
+      if (year !== "all" && q.exam.year !== Number(year)) return false;
       if (subject !== "all" && q.exam.subject !== subject) return false;
       if (cat !== "all" && q.cat !== cat) return false;
       if (kind !== "all" && q.kind !== kind) return false;
@@ -70,7 +87,7 @@
       <article class="panel question-card">
         <div class="question-head">
           <div>
-            <p class="eyebrow">${q.exam.year} 學年度・數學 ${q.exam.subject}</p>
+            <p class="eyebrow">${q.exam.year} 學年度・${q.exam.label}</p>
             <h2 class="question-title">第 ${q.no} 題｜${q.summary}</h2>
             <div class="chips">
               <span class="chip">${q.cat}</span>
@@ -81,14 +98,14 @@
           <div class="counter">${state.index + 1} / ${state.pool.length}</div>
         </div>
         ${group}
-        <img class="question-image" src="${q.image}" alt="${q.exam.year} 學年度數學 ${q.exam.subject} 第 ${q.no} 題官方題面">
+        <img class="question-image" src="${q.image}" alt="${q.exam.year} 學年度${q.exam.label}第 ${q.no} 題官方題面">
         <div class="answer-zone">${answerControl(q)}</div>
         <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
         ${stats}
         <div class="btn-row">
           <button class="btn ghost" id="prevBtn" type="button">上一題</button>
           <button class="btn secondary" id="nextBtn" type="button">下一題</button>
-          <a class="btn ghost" href="check?subject=${q.exam.subject}&no=${q.no}" style="text-decoration:none">查題校對</a>
+          <a class="btn ghost" href="check?year=${q.exam.year}&subject=${q.exam.subject}&no=${q.no}" style="text-decoration:none">查題校對</a>
         </div>
       </article>`;
     bindQuestion(q);
@@ -152,7 +169,8 @@
   }
 
   populateFilters();
-  ["subjectSel", "catSel", "kindSel", "diffSel"].forEach((id) => $(id).addEventListener("change", start));
+  updateStats();
+  ["yearSel", "subjectSel", "catSel", "kindSel", "diffSel"].forEach((id) => $(id).addEventListener("change", start));
   $("shuffleBtn").addEventListener("click", () => {
     state.pool = filtered().sort(() => Math.random() - .5);
     state.index = 0;
