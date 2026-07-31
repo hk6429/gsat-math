@@ -81,7 +81,13 @@
         </div>
         <div id="categoryGroups"></div>
         <div class="filter-controls">
-          <label>年份：<select id="yearSel"></select></label>
+          <fieldset class="paper-year-filter main-year-filter">
+            <legend>年份（可複選）</legend>
+            <details class="paper-year-multi" id="mainYearFilter">
+              <summary id="mainYearSummary">全部年度</summary>
+              <div class="paper-year-options" id="mainYearOptions"></div>
+            </details>
+          </fieldset>
           <label>考科：<select id="subjectSel"></select></label>
           <label>題數：<input id="questionLimit" type="number" min="1" max="100" value="10"></label>
           <label><input id="shuffleCheck" type="checkbox" checked> 隨機出題</label>

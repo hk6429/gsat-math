@@ -411,6 +411,8 @@ select, input[type="text"], input[type="number"] {
   margin: 0;
   border: 0;
 }
+.main-year-filter { min-width: min(100%, 250px); }
+.main-year-filter .paper-year-options { min-width: 0; }
 .paper-year-filter legend { margin-bottom: 4px; font-size: .86rem; }
 .paper-year-multi { position: relative; }
 .paper-year-multi summary {
