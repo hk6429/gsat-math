@@ -4,7 +4,7 @@
   const $ = (id) => document.getElementById(id);
   const state = {
     pool: [], index: 0, selected: new Set(), answered: new Set(), correct: 0,
-    activeTags: new Set(), timerId: null, secondsLeft: 0, timed: false, startedAt: null
+    activeTags: new Set(), paperIds: new Set(), timerId: null, secondsLeft: 0, timed: false, startedAt: null
   };
 
   const safeStorage = {
@@ -31,7 +31,8 @@
     const subjects = [...new Map(exams.map((exam) => [exam.subject, exam.label])).entries()];
     $("yearSel").innerHTML = '<option value="all">全部 33 個年份</option>' + years.map((year) => `<option value="${year}">${year} 學年度</option>`).join("");
     $("subjectSel").innerHTML = '<option value="all">全部考科</option>' + subjects.map(([value, label]) => `<option value="${value}">${label}</option>`).join("");
-    $("mockFormSel").innerHTML += exams.map((exam) => `<option value="${exam.year}${exam.subject}">${exam.year} 學年度・${exam.label}</option>`).join("");
+    $("paperYearQuick").innerHTML = '<option value="all">全部</option>' + years.map((year) => `<option value="${year}">${year} 學年度</option>`).join("");
+    $("paperSubjectQuick").innerHTML = '<option value="all">全部考科</option>' + subjects.map(([value, label]) => `<option value="${value}">${label}</option>`).join("");
 
     const categoryMap = new Map();
     for (const q of allQuestions) {
@@ -112,7 +113,8 @@
       `鑑別度 ${selectedText("discSel")}`
     ];
     $("filterSummary").textContent = parts.join(" ・ ");
-    $("countInfo").textContent = `符合條件且尚未被題數上限截斷：${pool.length} 題（題庫總計 ${allQuestions.length} 題）`;
+    $("countInfo").textContent = `符合條件共 ${pool.length} 題（題庫總計 ${allQuestions.length} 題）`;
+    if (!$("paperPanel").hidden) renderPaperQuestionList();
   }
 
   function strategyFor(q) {
@@ -285,7 +287,10 @@
   }
 
   function updateWrongCount() {
-    $("wrongCount").textContent = (safeStorage.get("gsatMathWrong", []) || []).length;
+    const count = (safeStorage.get("gsatMathWrong", []) || []).length;
+    $("wrongCount").textContent = count;
+    $("reviewBtn").hidden = count === 0;
+    $("reviewBtn").querySelector("b").textContent = count;
   }
 
   function showUtility(html) {
@@ -294,11 +299,118 @@
     $("utilityPanel").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  function renderPaper() {
-    const pool = filtered().slice(0, Math.max(1, Number($("questionLimit").value) || 10));
-    if (!pool.length) return alert("目前條件沒有可出卷的題目。");
-    $("questionArea").innerHTML = pool.map((q, index) => `<article class="panel paper-question"><b>${index + 1}. ${q.exam.year} 學年度・${q.exam.label}・原題第 ${q.no} 題</b>${q.groupImage ? `<img class="group-image" src="${q.groupImage}" alt="題組材料">` : ""}<img class="question-image" src="${q.image}" alt="官方題面"></article>`).join("");
-    setTimeout(() => window.print(), 250);
+  function selectedPaperQuestions() {
+    return allQuestions.filter((q) => state.paperIds.has(questionKey(q)));
+  }
+
+  function updatePaperCount() {
+    $("paperSelectedCount").textContent = `已選 ${state.paperIds.size} 題`;
+  }
+
+  function renderPaperQuestionList() {
+    const pool = filtered();
+    $("paperFilterInfo").textContent = `目前套用篩選：年份 ${selectedText("yearSel")}・考科 ${selectedText("subjectSel")}，符合 ${pool.length} 題（可回到上方「選擇範圍」調整類別、年份、難度與鑑別度）。`;
+    $("paperQuestionList").innerHTML = pool.length ? pool.map((q) => {
+      const key = questionKey(q);
+      return `<label class="paper-item"><input class="paperCheck" type="checkbox" value="${key}" ${state.paperIds.has(key) ? "checked" : ""}><span><b>${q.exam.year} 學年度・${escapeHtml(q.exam.label)}・第 ${q.no} 題</b><br>${escapeHtml(q.summary)}・${escapeHtml(difficulty(q))}</span></label>`;
+    }).join("") : '<p class="empty">目前條件沒有可出卷的題目。</p>';
+    document.querySelectorAll(".paperCheck").forEach((box) => box.addEventListener("change", () => {
+      box.checked ? state.paperIds.add(box.value) : state.paperIds.delete(box.value);
+      updatePaperCount();
+    }));
+    updatePaperCount();
+  }
+
+  function openPaperPanel() {
+    $("utilityPanel").hidden = true;
+    $("paperPanel").hidden = false;
+    $("paperLinkOutput").hidden = true;
+    renderPaperQuestionList();
+    $("paperPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function paperQuestionBodyHtml(q) {
+    const content = window.MathQuestionUI.contentFor(q);
+    if (!content?.verified) return `<img class="question-image" src="${q.image}" alt="官方題面">`;
+    const figures = (content.figures || []).map((figure) => `<figure class="question-figure"><img src="${figure.src}" alt="${escapeHtml(figure.alt)}">${figure.caption ? `<figcaption>${escapeHtml(figure.caption)}</figcaption>` : ""}</figure>`).join("");
+    const options = content.options ? `<ol class="paper-options">${Object.entries(content.options).map(([key, value]) => `<li value="${key}">${window.MathQuestionUI.richText(value)}</li>`).join("")}</ol>` : "";
+    return `<div class="paper-body"><div class="stem">${window.MathQuestionUI.richText(content.stem)}</div>${figures}${options}</div>`;
+  }
+
+  function renderPaperDocument(pool) {
+    const questions = pool.map((q, index) => `<article class="panel paper-question"><b>${index + 1}. ${q.exam.year} 學年度・${escapeHtml(q.exam.label)}・原題第 ${q.no} 題</b>${paperQuestionBodyHtml(q)}</article>`).join("");
+    const answers = pool.map((q, index) => `<span>${index + 1}. <b>${escapeHtml(q.answer)}</b></span>`).join("");
+    const solutions = pool.map((q, index) => `<article class="paper-solution"><h3>${index + 1}. ${q.exam.year} 學年度・原題第 ${q.no} 題</h3>${explanationHtml(q)}</article>`).join("");
+    $("questionArea").innerHTML = `${questions}<section class="panel paper-teacher"><h2>教師答案卷</h2><div class="paper-answer-grid">${answers}</div><h2>教師詳解卷</h2>${solutions}</section>`;
+  }
+
+  function requirePaperSelection() {
+    const pool = selectedPaperQuestions();
+    if (!pool.length) alert("請先勾選至少一題。");
+    return pool;
+  }
+
+  function paperQuizUrl(pool) {
+    const url = new URL(location.href);
+    url.search = "";
+    url.hash = "";
+    url.searchParams.set("quiz", pool.map(questionKey).join("."));
+    return url.toString();
+  }
+
+  function createPaperLink() {
+    const pool = requirePaperSelection();
+    if (!pool.length) return;
+    const url = paperQuizUrl(pool);
+    $("paperLinkOutput").hidden = false;
+    $("paperLinkOutput").innerHTML = `學生測驗連結：<a href="${escapeHtml(url)}">${escapeHtml(url)}</a>　<button class="text-toggle" id="copyPaperLinkBtn" type="button">複製連結</button>`;
+    $("copyPaperLinkBtn").addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(url);
+        $("copyPaperLinkBtn").textContent = "已複製";
+      } catch {
+        prompt("請複製以下測驗連結：", url);
+      }
+    });
+  }
+
+  function printPaper() {
+    const pool = requirePaperSelection();
+    if (!pool.length) return;
+    renderPaperDocument(pool);
+    let pageStyle = $("paperPageStyle");
+    if (!pageStyle) {
+      pageStyle = document.createElement("style");
+      pageStyle.id = "paperPageStyle";
+      document.head.append(pageStyle);
+    }
+    pageStyle.textContent = `@page { size: ${$("paperSizeSel").value} portrait; margin: 12mm; }`;
+    setTimeout(() => window.print(), 350);
+  }
+
+  function downloadPaperWord() {
+    const pool = requirePaperSelection();
+    if (!pool.length) return;
+    const absoluteQuestionBody = (q) => paperQuestionBodyHtml(q).replace(/src="([^"]+)"/g, (_match, path) => `src="${new URL(path, location.href).href}"`);
+    const questions = pool.map((q, index) => `<section><h2>${index + 1}. ${q.exam.year} 學年度・${escapeHtml(q.exam.label)}・原題第 ${q.no} 題</h2>${absoluteQuestionBody(q)}</section>`).join("");
+    const answers = pool.map((q, index) => `<p>${index + 1}. <b>${escapeHtml(q.answer)}</b></p>`).join("");
+    const solutions = pool.map((q, index) => `<section><h3>${index + 1}. ${q.exam.year} 學年度・原題第 ${q.no} 題</h3>${explanationHtml(q)}</section>`).join("");
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>數學科練習測驗卷</title><style>body{font-family:"Noto Serif TC","Microsoft JhengHei",serif;line-height:1.7}img{max-width:100%;height:auto}section{page-break-inside:avoid}.teacher{page-break-before:always}.paper-options{columns:2}.katex-html{display:none}</style></head><body><h1>數學科練習測驗卷</h1>${questions}<div class="teacher"><h1>教師答案卷</h1>${answers}<h1>教師詳解卷</h1>${solutions}</div></body></html>`;
+    const blob = new Blob(["\ufeff", html], { type: "application/msword" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "數學科練習測驗卷.doc";
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1_000);
+  }
+
+  function loadLinkedQuiz() {
+    const ids = new URLSearchParams(location.search).get("quiz")?.split(".").filter(Boolean);
+    if (!ids?.length) return;
+    const byKey = new Map(allQuestions.map((q) => [questionKey(q), q]));
+    const pool = ids.map((id) => byKey.get(id)).filter(Boolean);
+    if (pool.length) start({ pool, forceShuffle: false, limit: pool.length, minutes: 0 });
   }
 
   populateFilters();
@@ -337,17 +449,56 @@
     updateFilterSummary();
   });
   ["yearSel","subjectSel","questionLimit","shuffleCheck","timedCheck","diffSel","discSel","excludeDone","easyFirst"].forEach((id) => $(id).addEventListener("change", updateFilterSummary));
+  $("questionLimit").addEventListener("input", updateFilterSummary);
   document.querySelectorAll(".kindCheck").forEach((box) => box.addEventListener("change", updateFilterSummary));
 
   $("startBtn").addEventListener("click", () => start());
   $("quickStartBtn").addEventListener("click", () => start({ forceShuffle: true, limit: 10 }));
   $("mockBtn").addEventListener("click", () => {
-    const key = $("mockFormSel").value;
-    const exam = exams.find((item) => `${item.year}${item.subject}` === key);
-    if (!exam) return alert("請先選擇一份考卷。");
+    const year = $("yearSel").value;
+    const subject = $("subjectSel").value;
+    if (year === "all") {
+      if ($("filterBody").hidden) $("advToggle").click();
+      $("yearSel").focus();
+      $("yearSel").scrollIntoView({ behavior: "smooth", block: "center" });
+      return alert("請先在「進階篩選 → 年份」選擇一個特定年份，再開始整回模考。");
+    }
+    const forms = exams.filter((item) => item.year === Number(year) && (subject === "all" || item.subject === subject));
+    if (forms.length > 1) {
+      if ($("filterBody").hidden) $("advToggle").click();
+      $("subjectSel").focus();
+      $("subjectSel").scrollIntoView({ behavior: "smooth", block: "center" });
+      return alert("這個年份有多份數學考卷，請再選擇考科。");
+    }
+    const exam = forms[0];
+    if (!exam) return alert("目前年份與考科組合沒有完整考卷，請重新選擇。");
     start({ pool: exam.questions.map((q) => ({ ...q, exam })), forceShuffle: false, limit: exam.questions.length, minutes: exam.duration });
   });
-  $("paperBtn").addEventListener("click", renderPaper);
+  $("paperBtn").addEventListener("click", openPaperPanel);
+  $("paperCloseBtn").addEventListener("click", () => { $("paperPanel").hidden = true; });
+  $("paperSelectAllBtn").addEventListener("click", () => {
+    filtered().forEach((q) => state.paperIds.add(questionKey(q)));
+    renderPaperQuestionList();
+  });
+  $("paperSelectNoneBtn").addEventListener("click", () => {
+    state.paperIds.clear();
+    renderPaperQuestionList();
+  });
+  $("paperQuickBtn").addEventListener("click", () => {
+    const year = $("paperYearQuick").value;
+    const subject = $("paperSubjectQuick").value;
+    const diff = $("paperDiffQuick").value;
+    state.paperIds.clear();
+    filtered().filter((q) => {
+      if (year !== "all" && q.exam.year !== Number(year)) return false;
+      if (subject !== "all" && q.exam.subject !== subject) return false;
+      return diff === "all" || difficulty(q) === diff;
+    }).forEach((q) => state.paperIds.add(questionKey(q)));
+    renderPaperQuestionList();
+  });
+  $("paperLinkBtn").addEventListener("click", createPaperLink);
+  $("paperPrintBtn").addEventListener("click", printPaper);
+  $("paperWordBtn").addEventListener("click", downloadPaperWord);
   $("rankingBtn").addEventListener("click", () => {
     const rows = allQuestions.filter((q) => q.pass != null).sort((a, b) => a.pass - b.pass).slice(0, 20);
     showUtility(`<div class="toolrow"><h2>難度排行榜</h2><button class="text-toggle close-utility" type="button">關閉</button></div><p>依大考中心官方 P 值由低至高排列。</p><ol class="ranking-list">${rows.map((q) => `<li><b>${q.exam.year}・${q.exam.label}・第 ${q.no} 題</b>　${escapeHtml(q.summary)}　<span>${Math.round(q.pass * 100)}%</span></li>`).join("")}</ol>`);
@@ -359,6 +510,7 @@
     if (!pool.length) return alert("錯題本目前沒有題目。");
     start({ pool, forceShuffle: false, limit: pool.length });
   });
+  $("reviewBtn").addEventListener("click", () => $("wrongBtn").click());
   $("historyBtn").addEventListener("click", () => {
     const sessions = (safeStorage.get("gsatMathSessions", []) || []).slice().reverse();
     showUtility(`<div class="toolrow"><h2>學習歷程</h2><button class="text-toggle close-utility" type="button">關閉</button></div>${sessions.length ? sessions.map((row) => `<div class="history-row"><span>${new Date(row.at).toLocaleString("zh-TW")}</span><b>${row.correct}／${row.total}</b><span>作答 ${row.answered} 題・${formatTime(row.seconds)}</span></div>`).join("") : "<p>尚無完整練習紀錄。</p>"}`);
@@ -375,7 +527,7 @@
     const expanded = $("moreToggle").getAttribute("aria-expanded") === "true";
     $("moreTools").hidden = expanded;
     $("moreToggle").setAttribute("aria-expanded", String(!expanded));
-    $("moreToggle").textContent = expanded ? "更多功能 ▾" : "收合功能 ▴";
+    $("moreToggle").textContent = expanded ? "更多功能 ▾" : "更多功能 ▴";
   });
 
   const savedFontSize = safeStorage.get("gsatMathFontSize", "");
@@ -389,4 +541,5 @@
     if (className) document.documentElement.classList.add(className);
     safeStorage.set("gsatMathFontSize", className);
   }));
+  loadLinkedQuiz();
 })();
