@@ -31,7 +31,10 @@
     const subjects = [...new Map(exams.map((exam) => [exam.subject, exam.label])).entries()];
     $("yearSel").innerHTML = '<option value="all">全部 33 個年份</option>' + years.map((year) => `<option value="${year}">${year} 學年度</option>`).join("");
     $("subjectSel").innerHTML = '<option value="all">全部考科</option>' + subjects.map(([value, label]) => `<option value="${value}">${label}</option>`).join("");
-    $("paperYearQuick").innerHTML = '<option value="all">全部</option>' + years.map((year) => `<option value="${year}">${year} 學年度</option>`).join("");
+    $("paperYearQuickOptions").innerHTML = `
+      <label class="paper-year-all"><input id="paperYearAll" type="checkbox" value="all" checked> 全部年度</label>
+      ${years.map((year) => `<label><input class="paper-year-checkbox" type="checkbox" value="${year}"> ${year} 學年度</label>`).join("")}`;
+    updatePaperYearQuickSummary();
     $("paperSubjectQuick").innerHTML = '<option value="all">全部考科</option>' + subjects.map(([value, label]) => `<option value="${value}">${label}</option>`).join("");
 
     const categoryMap = new Map();
@@ -53,6 +56,42 @@
         </div>
         <div class="tag-checks" data-cat-tags="${escapeHtml(cat)}" hidden>${[...tags].sort().map((tag) => `<label><input class="tagCheck" type="checkbox" data-cat="${escapeHtml(cat)}" value="${escapeHtml(tag)}" checked> ${escapeHtml(tag)}</label>`).join("")}</div>
       </div>`).join("");
+  }
+
+  function selectedPaperYears() {
+    if ($("paperYearAll").checked) return null;
+    return new Set(
+      [...document.querySelectorAll(".paper-year-checkbox:checked")].map((checkbox) =>
+        Number(checkbox.value),
+      ),
+    );
+  }
+
+  function updatePaperYearQuickSummary() {
+    const years = [...document.querySelectorAll(".paper-year-checkbox:checked")]
+      .map((checkbox) => Number(checkbox.value))
+      .sort((a, b) => b - a);
+    $("paperYearQuickSummary").textContent =
+      $("paperYearAll").checked || !years.length
+        ? "全部年度"
+        : years.length <= 4
+          ? `${years.join("、")} 學年度`
+          : `${years.slice(0, 3).join("、")} 等 ${years.length} 個年度`;
+  }
+
+  function handlePaperYearChange(event) {
+    const all = $("paperYearAll");
+    const years = [...document.querySelectorAll(".paper-year-checkbox")];
+    if (event.target === all && all.checked) {
+      years.forEach((checkbox) => { checkbox.checked = false; });
+    } else if (
+      event.target.classList.contains("paper-year-checkbox") &&
+      event.target.checked
+    ) {
+      all.checked = false;
+    }
+    if (!all.checked && !years.some((checkbox) => checkbox.checked)) all.checked = true;
+    updatePaperYearQuickSummary();
   }
 
   function updateStats() {
@@ -484,13 +523,14 @@
     state.paperIds.clear();
     renderPaperQuestionList();
   });
+  $("paperYearQuickOptions").addEventListener("change", handlePaperYearChange);
   $("paperQuickBtn").addEventListener("click", () => {
-    const year = $("paperYearQuick").value;
+    const years = selectedPaperYears();
     const subject = $("paperSubjectQuick").value;
     const diff = $("paperDiffQuick").value;
     state.paperIds.clear();
     filtered().filter((q) => {
-      if (year !== "all" && q.exam.year !== Number(year)) return false;
+      if (years && !years.has(q.exam.year)) return false;
       if (subject !== "all" && q.exam.subject !== subject) return false;
       return diff === "all" || difficulty(q) === diff;
     }).forEach((q) => state.paperIds.add(questionKey(q)));

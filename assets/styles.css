@@ -405,6 +405,50 @@ select, input[type="text"], input[type="number"] {
 }
 .paper-controls label,
 .paper-actions label { display: inline-flex; align-items: center; gap: 6px; font-size: .86rem; }
+.paper-year-filter {
+  min-width: min(100%, 250px);
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+.paper-year-filter legend { margin-bottom: 4px; font-size: .86rem; }
+.paper-year-multi { position: relative; }
+.paper-year-multi summary {
+  min-height: 42px;
+  padding: 9px 34px 9px 12px;
+  overflow: hidden;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.paper-year-options {
+  position: static;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(92px, 1fr));
+  gap: 2px 10px;
+  width: 100%;
+  min-width: 250px;
+  max-height: 280px;
+  padding: 10px;
+  margin-top: 4px;
+  overflow-y: auto;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(29, 43, 79, .16);
+}
+.paper-year-options label { min-height: 38px; cursor: pointer; }
+.paper-year-options input { width: 18px; height: 18px; }
+.paper-year-all {
+  grid-column: 1 / -1;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--line);
+  font-weight: 700;
+}
 .paper-controls select,
 .paper-actions select { width: auto; min-width: 132px; min-height: 42px; }
 .paper-actions { align-items: center; }
