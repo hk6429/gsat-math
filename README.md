@@ -52,7 +52,11 @@
 - 101～115 學年度官方各選項畫記率，並整合至逐選項文字解析
 - 95～115 學年度逐題文字解析與 LaTeX／KaTeX 公式
 - 查題校對頁
+- 單題問題回報會附帶題幹、選項、答案與解析，並由 Cloudflare Pages Function 安全送往 Telegram
+- 頁尾一般網站問題回報
 - 作答紀錄保存在使用者自己的瀏覽器
+
+Cloudflare Pages 專案需設定 `TELEGRAM_BOT_TOKEN` 與 `TELEGRAM_CHAT_ID`；機密資料不得寫入前端或版本庫。
 
 ## 本機執行
 

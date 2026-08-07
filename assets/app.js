@@ -263,7 +263,7 @@
       <div class="question-head"><div><p class="eyebrow">${q.exam.year} 學年度・${q.exam.label}</p><h2 class="question-title">第 ${q.no} 題｜${escapeHtml(q.summary)}</h2><div class="chips"><span class="chip">${escapeHtml(q.cat)}</span><span class="chip">${escapeHtml(q.tags[0])}</span><span class="chip accent">${kindLabel(q.kind)}</span></div></div><div class="counter">${state.index + 1} / ${state.pool.length}</div></div>
       ${group}${window.MathQuestionUI.questionBodyHtml(q)}
       <div class="answer-zone">${answerControl(q)}</div><div id="feedback" class="feedback" role="status" aria-live="polite"></div><div id="postAnswer"></div>${stats}
-      <div class="btn-row"><button class="btn ghost" id="prevBtn" type="button">上一題</button><button class="btn secondary" id="nextBtn" type="button">下一題</button><a class="btn ghost" href="check?year=${q.exam.year}&subject=${q.exam.subject}&no=${q.no}">查題校對</a></div>
+      <div class="btn-row"><button class="btn ghost" id="prevBtn" type="button">上一題</button><button class="btn secondary" id="nextBtn" type="button">下一題</button><a class="btn ghost" href="check?year=${q.exam.year}&subject=${q.exam.subject}&no=${q.no}">查題校對</a><button class="btn ghost report-question-btn" id="questionReportBtn" type="button">回報本題問題</button></div>
     </article>`;
     bindQuestion(q);
     $("questionArea").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -294,6 +294,7 @@
     $("selfCheckBtn")?.addEventListener("click", () => markWritten(q));
     $("prevBtn").addEventListener("click", () => { state.index = Math.max(0, state.index - 1); render(); });
     $("nextBtn").addEventListener("click", () => { state.index = Math.min(state.pool.length - 1, state.index + 1); render(); });
+    $("questionReportBtn").addEventListener("click", () => window.MathReport.openQuestion(q));
   }
 
   function markWritten(q) {

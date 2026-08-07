@@ -7,6 +7,12 @@ const QUESTION_REASONS = new Set([
   "其他",
 ]);
 const GENERAL_REASONS = new Set(["操作異常", "顯示問題", "功能建議", "其他"]);
+const ALLOWED_ORIGINS = new Set([
+  "https://gsat-math.vercel.app",
+  "https://gsat-math.pages.dev",
+  "https://gsat-math.netlify.app",
+  "http://localhost:4173",
+]);
 const duplicateReports = new Map();
 const rateReports = new Map();
 const DUPLICATE_WINDOW_MS = 5 * 60 * 1_000;
@@ -15,6 +21,21 @@ const RATE_LIMIT = 6;
 
 function text(value, limit = 800) {
   return String(value ?? "").trim().slice(0, limit);
+}
+
+function corsHeaders(request) {
+  const origin = request.headers.get("origin");
+  if (!origin || !ALLOWED_ORIGINS.has(origin)) return {};
+  return {
+    "access-control-allow-origin": origin,
+    "access-control-allow-methods": "POST, OPTIONS",
+    "access-control-allow-headers": "content-type",
+    vary: "Origin",
+  };
+}
+
+function json(request, body, status = 200, extraHeaders = {}) {
+  return Response.json(body, { status, headers: { ...corsHeaders(request), ...extraHeaders } });
 }
 
 function formatQuestionReport(payload) {
@@ -31,6 +52,7 @@ function formatQuestionReport(payload) {
     `題幹：\n${text(context.prompt, 600)}`,
     options ? `選項：\n${options}` : "",
     `官方答案：${text(context.answer, 100)}`,
+    context.selected ? `回報當下作答：${text(context.selected, 100)}` : "",
     `解析：\n${text(context.explanation, 600)}`,
     payload.note ? `補充：\n${text(payload.note, 300)}` : "",
     context.image ? `題圖：${text(context.image, 200)}` : "",
@@ -89,37 +111,38 @@ function recentReports(request, now = Date.now()) {
   return { ip, recent };
 }
 
-async function handle(request) {
-  if (request.method !== "POST") {
-    return Response.json({ ok: false, error: "僅接受 POST。" }, { status: 405, headers: { Allow: "POST" } });
-  }
+async function handle(request, environment = globalThis.process?.env || {}) {
+  const origin = request.headers.get("origin");
+  if (origin && !ALLOWED_ORIGINS.has(origin)) return json(request, { ok: false, error: "不允許的來源。" }, 403);
+  if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: corsHeaders(request) });
+  if (request.method !== "POST") return json(request, { ok: false, error: "僅接受 POST。" }, 405, { allow: "POST, OPTIONS" });
 
   const rawBody = await request.text();
   if (rawBody.length > 30_000) {
-    return Response.json({ ok: false, error: "回報內容過大。" }, { status: 413 });
+    return json(request, { ok: false, error: "回報內容過大。" }, 413);
   }
   let payload;
   try {
     payload = JSON.parse(rawBody);
   } catch {
-    return Response.json({ ok: false, error: "回報資料格式不正確。" }, { status: 400 });
+    return json(request, { ok: false, error: "回報資料格式不正確。" }, 400);
   }
   if (!validPayload(payload)) {
-    return Response.json({ ok: false, error: "請確認回報內容後再送出。" }, { status: 400 });
+    return json(request, { ok: false, error: "請確認回報內容後再送出。" }, 400);
   }
   const dedupeKey = duplicateKey(request, payload);
   const previousReport = duplicateReports.get(dedupeKey);
   if (previousReport && Date.now() - previousReport < DUPLICATE_WINDOW_MS) {
-    return Response.json({ ok: false, error: "相同問題已收到，請勿重複送出。" }, { status: 429 });
+    return json(request, { ok: false, error: "相同問題已收到，請勿重複送出。" }, 429);
   }
   const rate = recentReports(request);
   if (rate.recent.length >= RATE_LIMIT) {
-    return Response.json({ ok: false, error: "回報次數過多，請稍後再試。" }, { status: 429 });
+    return json(request, { ok: false, error: "回報次數過多，請稍後再試。" }, 429);
   }
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_REPORT_CHAT_ID;
+  const token = environment.TELEGRAM_BOT_TOKEN;
+  const chatId = environment.TELEGRAM_CHAT_ID || environment.TELEGRAM_REPORT_CHAT_ID;
   if (!token || !chatId) {
-    return Response.json({ ok: false, error: "回報服務尚未完成設定。" }, { status: 503 });
+    return json(request, { ok: false, error: "回報服務尚未完成設定。" }, 503);
   }
   let telegramResponse;
   try {
@@ -132,14 +155,14 @@ async function handle(request) {
       }),
     });
   } catch {
-    return Response.json({ ok: false, error: "回報暫時無法送出，請稍後再試。" }, { status: 502 });
+    return json(request, { ok: false, error: "回報暫時無法送出，請稍後再試。" }, 502);
   }
   if (!telegramResponse.ok) {
-    return Response.json({ ok: false, error: "回報暫時無法送出，請稍後再試。" }, { status: 502 });
+    return json(request, { ok: false, error: "回報暫時無法送出，請稍後再試。" }, 502);
   }
   duplicateReports.set(dedupeKey, Date.now());
   rateReports.set(rate.ip, [...rate.recent, Date.now()]);
-  return Response.json({ ok: true });
+  return json(request, { ok: true });
 }
 
 export default { fetch: handle };

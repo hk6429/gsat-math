@@ -160,15 +160,37 @@
         <a href="index.html" aria-current="page">題庫練習</a>
         <a href="check">查題校對</a>
         <a href="about.html">資料來源與說明</a>
+        <button class="footer-report" id="generalReportBtn" type="button">回報網站問題</button>
       </nav>
     </footer>
   </main>
+
+  <dialog class="report-dialog" id="reportDialog" aria-labelledby="reportTitle">
+    <form id="reportForm">
+      <div class="report-head">
+        <div><p class="eyebrow">協助我們改善題庫</p><h2 id="reportTitle">回報問題</h2></div>
+        <button class="dialog-close" id="reportCloseBtn" type="button" aria-label="關閉回報表單">×</button>
+      </div>
+      <p id="reportContextLabel" class="report-context"></p>
+      <label for="reportReason"><b>問題類型</b></label>
+      <select id="reportReason" required></select>
+      <label for="reportNote"><b>補充說明</b> <span id="reportNoteHint">（選填）</span></label>
+      <textarea id="reportNote" maxlength="1000" rows="4" placeholder="若方便，請描述你看到的情況。"></textarea>
+      <label class="report-trap" aria-hidden="true">網站<input id="reportWebsite" type="text" tabindex="-1" autocomplete="off"></label>
+      <p id="reportStatus" class="report-status" role="status" aria-live="polite"></p>
+      <div class="btn-row">
+        <button class="btn ghost" id="reportCancelBtn" type="button">取消</button>
+        <button class="btn" id="reportSubmitBtn" type="submit">送出回報</button>
+      </div>
+    </form>
+  </dialog>
 
   <script src="data/bank.js"></script>
   <script src="data/content.js"></script>
   <script src="data/option-rates.js"></script>
   <script src="assets/vendor/katex/katex.min.js"></script>
   <script src="assets/math-renderer.js"></script>
+  <script src="assets/report.js?v=20260807-report"></script>
   <script src="assets/app.js"></script>
   <script src="https://self-learning-orbit.pages.dev/exam-counter.js?v=20260803-1" data-site="gsat-math"></script>
 </body>
